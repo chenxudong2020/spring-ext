@@ -35,12 +35,6 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, EnvironmentA
     public T getObject() throws Exception {
         RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
         CallProperties callProperties = CallProperties.getInstance();
-        Map<String,String> urlMap=new ConcurrentHashMap<>();
-        callProperties.interfaceUrlMap.forEach((x,y)->{
-            y=environment.resolvePlaceholders(y);
-            urlMap.put(x,y);
-        });
-        callProperties.interfaceUrlMap.putAll(urlMap);
         return (T) Proxy.newProxyInstance(callInterface.getClassLoader(),
                 new Class<?>[]{callInterface},
                 new CallInterfaceHandler(restTemplate, callProperties)
@@ -63,6 +57,13 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, EnvironmentA
     @Override
     public void setEnvironment(Environment environment) {
         this.environment=environment;
+        CallProperties callProperties = CallProperties.getInstance();
+        Map<String,String> urlMap=new ConcurrentHashMap<>();
+        callProperties.interfaceUrlMap.forEach((x,y)->{
+            y=environment.resolvePlaceholders(y);
+            urlMap.put(x,y);
+        });
+        callProperties.interfaceUrlMap.putAll(urlMap);
 
     }
 
