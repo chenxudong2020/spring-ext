@@ -44,7 +44,6 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
         CallProperties callProperties = CallProperties.getInstance();
         GenericBeanDefinition genericBeanDefinition;
-        Class tClass;
         for (BeanDefinitionHolder holder : beanDefinitions) {
 
             AnnotatedBeanDefinition beanDefinition = (AnnotatedBeanDefinition) holder.getBeanDefinition();

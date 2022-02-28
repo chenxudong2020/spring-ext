@@ -1,8 +1,6 @@
 package org.spring.boot.extender.invoker.api;
 
 
-import org.spring.boot.extender.interfacecall.annotation.Body;
-import org.spring.boot.extender.interfacecall.annotation.Head;
 import org.spring.boot.extender.interfacecall.annotation.InterfaceClient;
 import org.spring.boot.extender.interfacecall.annotation.POST;
 import org.spring.boot.extender.invoker.bean.Input;
