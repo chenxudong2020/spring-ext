@@ -4,6 +4,7 @@ import org.spring.boot.extender.interfacecall.annotation.Body;
 import org.spring.boot.extender.interfacecall.annotation.InterfaceClient;
 import org.spring.boot.extender.interfacecall.annotation.POST;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -13,8 +14,13 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.MethodMetadata;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
@@ -40,8 +46,17 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
         CallProperties callProperties=CallProperties.getInstance();
         GenericBeanDefinition genericBeanDefinition;
+        //Map<String,Method> params=new ConcurrentHashMap<>();
         for(BeanDefinitionHolder holder:beanDefinitions){
+
             AnnotatedBeanDefinition beanDefinition = (AnnotatedBeanDefinition) holder.getBeanDefinition();
+        /*    try {
+                Arrays.stream(Class.forName(beanDefinition.getBeanClassName()).getDeclaredMethods()).forEach(x->{
+                    params.put( x.getName(),x);
+                });
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }*/
             AnnotationAttributes annAttr = AnnotationAttributes.fromMap(beanDefinition.getMetadata().getAnnotationAttributes(InterfaceClient.class.getName()));
             String value=annAttr.getString("value");
             Set<MethodMetadata> methodMetadataSet=beanDefinition.getMetadata().getAnnotatedMethods(POST.class.getName());
