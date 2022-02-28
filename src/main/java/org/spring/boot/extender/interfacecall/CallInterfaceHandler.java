@@ -1,6 +1,7 @@
 package org.spring.boot.extender.interfacecall;
 
 import org.spring.boot.extender.interfacecall.annotation.Body;
+import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.spring.boot.extender.invoker.bean.Result;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.http.HttpEntity;
@@ -13,14 +14,18 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.List;
+import java.util.Map;
 
 public class CallInterfaceHandler  implements InvocationHandler {
     private RestTemplate restTemplate;
     private CallProperties callProperties;
+    private String className;
 
-    public CallInterfaceHandler(RestTemplate restTemplate, CallProperties callProperties) {
+    public CallInterfaceHandler(RestTemplate restTemplate, CallProperties callProperties,String className) {
         this.restTemplate = restTemplate;
         this.callProperties = callProperties;
+        this.className=className;
     }
 
     @Override
@@ -29,22 +34,26 @@ public class CallInterfaceHandler  implements InvocationHandler {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(this,args);
         }
-        String interfaceUrl=callProperties.interfaceUrlMap.get(method.getName());
-        String returnName=callProperties.returnMap.get(method.getName());
-        /*Parameter[] parameters=method.getParameters();
-        for(Parameter parameter:parameters){
-            Body body=parameter.getAnnotation(Body.class);
-        }
+        String key=String.format("%s-%s",className,method.getName());
+        String interfaceUrl=callProperties.interfaceUrlMap.get(key);
+        String returnName=callProperties.returnMap.get(key);
+        Map<String, List<ParameterMeta>> parameterMetaMap=callProperties.parameterMetaMap;
+        List<ParameterMeta> parameterMetas=parameterMetaMap.get(key);
+        int bodyCount=0;
         HttpHeaders headers = new HttpHeaders();
         MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
         headers.setContentType(type);
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
-        HttpEntity formEntity = new HttpEntity<>(args[0], headers);*/
-        if(args.length==1){
-            String errorMsg=String.format("调用接口%s传递的参数多余一个！",interfaceUrl);
-            throw new RuntimeException(errorMsg);
+        for(ParameterMeta parameterMeta:parameterMetas){
+            if(null!=parameterMeta.head){
+                headers.add(parameterMeta.head.value(), args[parameterMeta.parameterCount].toString());
+            }else if(null!=parameterMeta.body){
+                bodyCount= parameterMeta.bodyCount;
+            }
+
         }
-        return restTemplate.postForObject(interfaceUrl,args[0], Class.forName(returnName));
+        HttpEntity formEntity = new HttpEntity<>(args[bodyCount], headers);
+        return restTemplate.postForObject(interfaceUrl,formEntity, Class.forName(returnName));
 
     }
 }

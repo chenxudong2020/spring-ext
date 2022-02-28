@@ -37,7 +37,7 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, EnvironmentA
         CallProperties callProperties = CallProperties.getInstance();
         return (T) Proxy.newProxyInstance(callInterface.getClassLoader(),
                 new Class<?>[]{callInterface},
-                new CallInterfaceHandler(restTemplate, callProperties)
+                new CallInterfaceHandler(restTemplate, callProperties, callInterface.getName())
 
         );
 
