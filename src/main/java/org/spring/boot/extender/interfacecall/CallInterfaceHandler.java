@@ -5,10 +5,7 @@ import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.spring.boot.extender.invoker.bean.Result;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.annotation.Annotation;
@@ -57,12 +54,14 @@ public class CallInterfaceHandler  implements InvocationHandler {
             map.put(parameterMeta.parameterName,args[parameterMeta.parameterCount]);
 
         }
-        HttpEntity formEntity = new HttpEntity<>(args[bodyCount], headers);
+
         if(methodMeta.post!=null){
+            HttpEntity formEntity = new HttpEntity<>(args[bodyCount], headers);
             return restTemplate.postForObject(interfaceUrl,formEntity, Class.forName(returnName));
         }else if(methodMeta.get!=null){
-            return restTemplate.getForObject(interfaceUrl,Class.forName(returnName),map);
-        }
+            HttpEntity formEntity = new HttpEntity<>(headers);
+            return restTemplate.exchange(interfaceUrl, HttpMethod.GET,formEntity,Class.forName(returnName),map).getBody();
+         }
         return null;
 
 

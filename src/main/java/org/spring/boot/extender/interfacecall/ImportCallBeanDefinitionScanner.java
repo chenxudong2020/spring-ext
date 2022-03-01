@@ -115,7 +115,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                      interfaceUrlSuffix =methodMeta.get.value();
                 }
                 String interfaceUrl =interfaceUrlSuffix;
-                if(StringUtils.isEmpty(InterfaceClientValue)){
+                if(!StringUtils.isEmpty(InterfaceClientValue)){
                     interfaceUrl = String.format("%s/%s", InterfaceClientValue, interfaceUrlSuffix);
                 }
                 String returnName =x.getReturnType().getName();
