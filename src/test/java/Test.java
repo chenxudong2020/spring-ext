@@ -26,4 +26,12 @@ public class Test {
         String name=result.getData().getName();
         System.out.println(name);
     }
+
+    @org.junit.Test
+    public void test2(){
+        String name="asdadsasd";
+        Result result=remoteHttpApI.getUser2(name);
+
+        System.out.println(result.getData().getName());
+    }
 }

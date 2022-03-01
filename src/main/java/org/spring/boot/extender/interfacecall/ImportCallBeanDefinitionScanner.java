@@ -1,9 +1,7 @@
 package org.spring.boot.extender.interfacecall;
 
-import org.spring.boot.extender.interfacecall.annotation.Body;
-import org.spring.boot.extender.interfacecall.annotation.Head;
-import org.spring.boot.extender.interfacecall.annotation.InterfaceClient;
-import org.spring.boot.extender.interfacecall.annotation.POST;
+import org.spring.boot.extender.interfacecall.annotation.*;
+import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -47,21 +45,9 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         for (BeanDefinitionHolder holder : beanDefinitions) {
 
             AnnotatedBeanDefinition beanDefinition = (AnnotatedBeanDefinition) holder.getBeanDefinition();
-            callProperties.parameterMetaMap.putAll(getParameterMeta(beanDefinition));
             AnnotationAttributes annAttr = AnnotationAttributes.fromMap(beanDefinition.getMetadata().getAnnotationAttributes(InterfaceClient.class.getName()));
             String value = annAttr.getString("value");
-            Set<MethodMetadata> methodMetadataSet = beanDefinition.getMetadata().getAnnotatedMethods(POST.class.getName());
-
-            for (MethodMetadata methodMetadata : methodMetadataSet) {
-                String interfaceUrlSuffix = AnnotationAttributes.fromMap(methodMetadata.getAnnotationAttributes(POST.class.getName())).getString("value");
-                String interfaceUrl = String.format("%s/%s", value, interfaceUrlSuffix);
-                String methodName = methodMetadata.getMethodName();
-                String returnName = methodMetadata.getReturnTypeName();
-                String key = String.format("%s-%s", beanDefinition.getBeanClassName(), methodName);
-
-                callProperties.interfaceUrlMap.put(key, interfaceUrl);
-                callProperties.returnMap.put(key, returnName);
-            }
+            callProperties.parameterMetaMap.putAll(getParameterMeta(beanDefinition,value));
             genericBeanDefinition = (GenericBeanDefinition) holder.getBeanDefinition();
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(Objects.requireNonNull(genericBeanDefinition.getBeanClassName()));
             genericBeanDefinition.setBeanClass(CallInterfaceFactoryBean.class);
@@ -71,18 +57,20 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         return beanDefinitions;
     }
 
-    private Map<String, List<ParameterMeta>> getParameterMeta(AnnotatedBeanDefinition beanDefinition) {
+    private Map<String, List<ParameterMeta>> getParameterMeta(AnnotatedBeanDefinition beanDefinition,String InterfaceClientValue) {
         Class tClass;
         Map<String, List<ParameterMeta>> map=new ConcurrentHashMap<>();
+        CallProperties callProperties = CallProperties.getInstance();
         try {
             tClass = ClassUtils.forName(beanDefinition.getBeanClassName(), classLoader);
             int bodyCount =0;
             int count=0;
             Method[] methods = tClass.getDeclaredMethods();
             ParameterMeta parameterMeta = null;
-            List<ParameterMeta> list=new ArrayList<>();
+
             for (Method x : methods) {
                 Parameter[] parameters = x.getParameters();
+                List<ParameterMeta> list=new ArrayList<>();
                 for (Parameter parameter : parameters) {
                     String name = parameter.getName();
                     parameterMeta=new ParameterMeta();
@@ -112,6 +100,24 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                 }
                 String key = String.format("%s-%s", beanDefinition.getBeanClassName(), x.getName());
                 map.put(key,list);
+                MethodMeta methodMeta=new MethodMeta();
+                methodMeta.methodName=key;
+                methodMeta.post=x.getAnnotation(POST.class);
+                methodMeta.get=x.getAnnotation(GET.class);
+                if(methodMeta.post!=null&&methodMeta.get!=null){
+                    throw new RuntimeException(x.getName()+"post和get不能注解同一个方法!");
+                }
+                callProperties.methodMetaMap.put(key,methodMeta);
+                String interfaceUrlSuffix =null;
+                if(methodMeta.post!=null){
+                     interfaceUrlSuffix =methodMeta.post.value();
+                }else {
+                     interfaceUrlSuffix =methodMeta.get.value();
+                }
+                String interfaceUrl = String.format("%s/%s", InterfaceClientValue, interfaceUrlSuffix);
+                String returnName =x.getReturnType().getName();
+                callProperties.interfaceUrlMap.put(key, interfaceUrl);
+                callProperties.returnMap.put(key, returnName);
 
             }
             return map;
