@@ -13,6 +13,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -67,7 +68,6 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
             int count=0;
             Method[] methods = tClass.getDeclaredMethods();
             ParameterMeta parameterMeta = null;
-
             for (Method x : methods) {
                 Parameter[] parameters = x.getParameters();
                 List<ParameterMeta> list=new ArrayList<>();
@@ -114,7 +114,10 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                 }else {
                      interfaceUrlSuffix =methodMeta.get.value();
                 }
-                String interfaceUrl = String.format("%s/%s", InterfaceClientValue, interfaceUrlSuffix);
+                String interfaceUrl =interfaceUrlSuffix;
+                if(StringUtils.isEmpty(InterfaceClientValue)){
+                    interfaceUrl = String.format("%s/%s", InterfaceClientValue, interfaceUrlSuffix);
+                }
                 String returnName =x.getReturnType().getName();
                 callProperties.interfaceUrlMap.put(key, interfaceUrl);
                 callProperties.returnMap.put(key, returnName);
