@@ -35,7 +35,6 @@ public class PostHandler implements MethodHandler {
                 bodyCount = parameterMeta.bodyCount;
             }
             else if (null != parameterMeta.url) {
-
                 url = (String)args[parameterMeta.parameterCount];
             }
         }

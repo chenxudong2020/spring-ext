@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface GET {
 
-    String value();
+    String value() default "";
 }

@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface POST {
 
-    String value();
+    String value() default "";
 }
