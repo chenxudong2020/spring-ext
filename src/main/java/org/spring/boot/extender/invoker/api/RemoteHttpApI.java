@@ -1,18 +1,15 @@
 package org.spring.boot.extender.invoker.api;
 
 
-import org.spring.boot.extender.interfacecall.annotation.GET;
-import org.spring.boot.extender.interfacecall.annotation.InterfaceClient;
-import org.spring.boot.extender.interfacecall.annotation.POST;
+import org.spring.boot.extender.interfacecall.annotation.*;
 import org.spring.boot.extender.invoker.bean.Input;
 import org.spring.boot.extender.invoker.bean.Result;
 
 @InterfaceClient("${baseUrl}")
 public interface RemoteHttpApI {
 
-
     @POST("${getUser}")
-   Result getUser(Input input);
+   Result getUser(@Body Input input, @Url String url);
 
     @GET("/getUser2?name={name}")
     Result getUser2(String name);

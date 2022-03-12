@@ -5,6 +5,7 @@ import org.spring.boot.extender.invoker.bean.Input;
 import org.spring.boot.extender.invoker.bean.Result;
 import org.spring.boot.extender.invoker.bean.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -18,11 +19,14 @@ public class Test {
     @Resource
     RemoteHttpApI remoteHttpApI;
 
+    @Value("${baseUrl}/${getUser}")
+    String url;
+
     @org.junit.Test
     public void test(){
         Input input=new Input();
         input.setId("1");
-        Result result=remoteHttpApI.getUser(input);
+        Result result=remoteHttpApI.getUser(input,url);
         String name=result.getData().getName();
         System.out.println(name);
     }

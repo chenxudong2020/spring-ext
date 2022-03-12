@@ -3,6 +3,8 @@ package org.spring.boot.extender.interfacecall;
 import org.spring.boot.extender.interfacecall.annotation.*;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
+import org.spring.boot.extender.interfacecall.handler.GetHandler;
+import org.spring.boot.extender.interfacecall.handler.PostHandler;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -65,6 +67,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         try {
             tClass = ClassUtils.forName(beanDefinition.getBeanClassName(), classLoader);
             int bodyCount =0;
+            int urlCount=0;
             int count=0;
             Method[] methods = tClass.getDeclaredMethods();
             ParameterMeta parameterMeta = null;
@@ -75,6 +78,17 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                     String name = parameter.getName();
                     parameterMeta=new ParameterMeta();
                     parameterMeta.parameterName=name;
+                    Url url = parameter.getAnnotation(Url.class);
+                    if (null != url) {
+                        urlCount=urlCount+1;
+                        parameterMeta.url=url;
+                        if (urlCount > 1) {
+                            throw new RuntimeException(x.getName()+"只允许一个url注解！");
+                        }
+                        if(parameterMeta.head!=null||parameterMeta.body!=null){
+                            throw new RuntimeException(x.getName()+"url只能注解一个参数!");
+                        }
+                    }
                     Body body = parameter.getAnnotation(Body.class);
                     if (null != body) {
                         bodyCount=bodyCount+1;
@@ -90,11 +104,11 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                     Head head = parameter.getAnnotation(Head.class);
                     if (null != head) {
                         parameterMeta.head=head;
-                        parameterMeta.parameterCount=count;
                         if(parameterMeta.body!=null){
                             throw new RuntimeException(x.getName()+"body和head不能注解一个参数!");
                         }
                     }
+                    parameterMeta.parameterCount=count;
                     count=count+1;
                     list.add(parameterMeta);
                 }
@@ -106,6 +120,12 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                 methodMeta.get=x.getAnnotation(GET.class);
                 if(methodMeta.post!=null&&methodMeta.get!=null){
                     throw new RuntimeException(x.getName()+"post和get不能注解同一个方法!");
+                }else if(methodMeta.post!=null&&methodMeta.get==null){
+                    methodMeta.methodHandler=new PostHandler();
+                }else if(methodMeta.post==null&&methodMeta.get!=null){
+                    methodMeta.methodHandler=new GetHandler();
+                }else{
+                    throw new RuntimeException(x.getName()+"post和get必须注解一个方法!");
                 }
                 callProperties.methodMetaMap.put(key,methodMeta);
                 String interfaceUrlSuffix =null;
