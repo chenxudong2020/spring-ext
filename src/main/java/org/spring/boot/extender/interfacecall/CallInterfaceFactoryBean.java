@@ -5,14 +5,11 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Proxy;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, EnvironmentAware, ApplicationContextAware {

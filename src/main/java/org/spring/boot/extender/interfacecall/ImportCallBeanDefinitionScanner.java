@@ -1,10 +1,15 @@
 package org.spring.boot.extender.interfacecall;
 
-import org.spring.boot.extender.interfacecall.annotation.*;
+
+
+import org.spring.boot.extender.interfacecall.annotation.GET;
+import org.spring.boot.extender.interfacecall.annotation.InterfaceClient;
+import org.spring.boot.extender.interfacecall.annotation.POST;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.spring.boot.extender.interfacecall.handler.GetHandler;
 import org.spring.boot.extender.interfacecall.handler.PostHandler;
+import org.spring.boot.extender.interfacecall.paramhandler.ParamHandler;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -13,7 +18,6 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -21,7 +25,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
@@ -60,59 +63,25 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         return beanDefinitions;
     }
 
-    private Map<String, List<ParameterMeta>> getParameterMeta(AnnotatedBeanDefinition beanDefinition,String InterfaceClientValue) {
+    private Map<String, List<ParameterMeta>> getParameterMeta(AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue) {
         Class tClass;
         Map<String, List<ParameterMeta>> map=new ConcurrentHashMap<>();
         CallProperties callProperties = CallProperties.getInstance();
         try {
             tClass = ClassUtils.forName(beanDefinition.getBeanClassName(), classLoader);
-            int bodyCount =0;
-            int urlCount=0;
-            int count=0;
             Method[] methods = tClass.getDeclaredMethods();
-            ParameterMeta parameterMeta = null;
-            for (Method x : methods) {
+             for (Method x : methods) {
                 Parameter[] parameters = x.getParameters();
                 List<ParameterMeta> list=new ArrayList<>();
-                for (Parameter parameter : parameters) {
-                    String name = parameter.getName();
-                    parameterMeta=new ParameterMeta();
-                    parameterMeta.parameterName=name;
-                    Url url = parameter.getAnnotation(Url.class);
-                    if (null != url) {
-                        urlCount=urlCount+1;
-                        parameterMeta.url=url;
-                        if (urlCount > 1) {
-                            throw new RuntimeException(x.getName()+"只允许一个url注解！");
-                        }
-                        if(parameterMeta.head!=null||parameterMeta.body!=null){
-                            throw new RuntimeException(x.getName()+"url只能注解一个参数!");
-                        }
-                    }
-                    Body body = parameter.getAnnotation(Body.class);
-                    if (null != body) {
-                        bodyCount=bodyCount+1;
-                        parameterMeta.body=body;
-                        if (bodyCount > 1) {
-                            throw new RuntimeException(x.getName()+"只允许一个body注解！");
-                        }
-                        if(parameterMeta.head!=null){
-                            throw new RuntimeException(x.getName()+"body和head不能注解一个参数!");
-                        }
-                        parameterMeta.bodyCount=count;
-                    }
-                    Head head = parameter.getAnnotation(Head.class);
-                    if (null != head) {
-                        parameterMeta.head=head;
-                        if(parameterMeta.body!=null){
-                            throw new RuntimeException(x.getName()+"body和head不能注解一个参数!");
-                        }
-                    }
-                    parameterMeta.parameterCount=count;
-                    count=count+1;
-                    list.add(parameterMeta);
+                ParamHandler paramHandler=null;
+                int parameterCount=0;
+                for (Parameter parameter : parameters){
+                     paramHandler=new ParamHandler();
+                     paramHandler.handler(beanDefinition,InterfaceClientValue,x,parameter,parameterCount);
+                     list.add(paramHandler.getHandlerRequest().getParameterMeta());
+                     parameterCount+=1;
                 }
-                String key = String.format("%s-%s", beanDefinition.getBeanClassName(), x.getName());
+                String key = paramHandler.getHandlerRequest().getKey();
                 map.put(key,list);
                 MethodMeta methodMeta=new MethodMeta();
                 methodMeta.methodName=key;

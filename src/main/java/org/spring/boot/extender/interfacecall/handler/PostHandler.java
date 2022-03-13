@@ -1,5 +1,6 @@
 package org.spring.boot.extender.interfacecall.handler;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.boot.extender.interfacecall.CallProperties;
@@ -10,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,19 +31,28 @@ public class PostHandler implements MethodHandler {
         headers.setContentType(type);
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
         String url=interfaceUrl;
+        List<Object> listObjs=new ArrayList<>(Arrays.asList(args));
         for (ParameterMeta parameterMeta : parameterMetas) {
-            if (null != parameterMeta.head) {
+            if (null != parameterMeta.head)
                 headers.add(parameterMeta.head.value(), args[parameterMeta.parameterCount].toString());
-            } else if (null != parameterMeta.body) {
+            else if (null != parameterMeta.body) {
                 bodyCount = parameterMeta.bodyCount;
             }
             else if (null != parameterMeta.url) {
                 url = (String)args[parameterMeta.parameterCount];
+                listObjs.remove(parameterMeta.parameterCount);
+            }
+            else if (null != parameterMeta.query) {
+                if(url.indexOf("?")==-1){
+                    url+="?";
+                }
+                url+=String.format("%s=%s",parameterMeta.query.value(),args[parameterMeta.parameterCount]);
+                listObjs.remove(parameterMeta.parameterCount);
             }
         }
         LOG.info(String.format("-->post:%s",url));
-
-        HttpEntity formEntity = new HttpEntity<>(args[bodyCount], headers);
+        args= listObjs.toArray();
+        HttpEntity formEntity = new HttpEntity<>(args.length==0?null:args[bodyCount], headers);
         return restTemplate.postForObject(url, formEntity, Class.forName(returnName));
     }
 }

@@ -2,11 +2,10 @@ package org.spring.boot.extender.interfacecall.annotation;
 
 import java.lang.annotation.*;
 
-
-@Target({ElementType.TYPE})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface InterfaceClient {
+public @interface Query {
 
-   String value() default "";
+    String value();
 }

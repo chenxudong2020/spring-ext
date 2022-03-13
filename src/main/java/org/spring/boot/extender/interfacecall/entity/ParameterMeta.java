@@ -1,8 +1,7 @@
 package org.spring.boot.extender.interfacecall.entity;
 
-import org.spring.boot.extender.interfacecall.annotation.Body;
-import org.spring.boot.extender.interfacecall.annotation.Head;
-import org.spring.boot.extender.interfacecall.annotation.Url;
+
+import org.spring.boot.extender.interfacecall.annotation.*;
 
 public class ParameterMeta {
     public int bodyCount=0;
@@ -11,6 +10,7 @@ public class ParameterMeta {
     public Head head;
     public String parameterName;
     public Url url;
+    public Query query;
 
 
 
