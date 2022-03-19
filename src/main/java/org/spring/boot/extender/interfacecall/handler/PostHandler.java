@@ -4,6 +4,7 @@ package org.spring.boot.extender.interfacecall.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.boot.extender.interfacecall.CallProperties;
+import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,8 +20,8 @@ import java.util.Map;
 public class PostHandler implements MethodHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PostHandler.class);
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) throws Throwable {
-        String key = String.format("%s-%s", className, method.getName());
+    public Object doHandler(Object proxy, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) throws Throwable {
+        String key = method.methodName;
         String interfaceUrl = callProperties.interfaceUrlMap.get(key);
         String returnName = callProperties.returnMap.get(key);
         Map<String, List<ParameterMeta>> parameterMetaMap = callProperties.parameterMetaMap;

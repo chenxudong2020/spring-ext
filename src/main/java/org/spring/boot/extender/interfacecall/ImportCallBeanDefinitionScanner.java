@@ -2,6 +2,7 @@ package org.spring.boot.extender.interfacecall;
 
 
 
+import org.spring.boot.extender.interfacecall.annotation.Cache;
 import org.spring.boot.extender.interfacecall.annotation.GET;
 import org.spring.boot.extender.interfacecall.annotation.InterfaceClient;
 import org.spring.boot.extender.interfacecall.annotation.POST;
@@ -87,6 +88,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                 methodMeta.methodName=key;
                 methodMeta.post=x.getAnnotation(POST.class);
                 methodMeta.get=x.getAnnotation(GET.class);
+                methodMeta.cache=x.getAnnotation(Cache.class);
                 if(methodMeta.post!=null&&methodMeta.get!=null){
                     throw new RuntimeException(x.getName()+"post和get不能注解同一个方法!");
                 }else if(methodMeta.post!=null&&methodMeta.get==null){

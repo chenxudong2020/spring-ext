@@ -3,6 +3,9 @@ package org.spring.boot.extender.interfacecall.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.boot.extender.interfacecall.CallProperties;
+import org.spring.boot.extender.interfacecall.annotation.Cache;
+import org.spring.boot.extender.interfacecall.entity.CacheMeta;
+import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,20 +14,22 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class GetHandler implements MethodHandler  {
     private static final Logger LOG = LoggerFactory.getLogger(PostHandler.class);
+
+
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) throws Throwable {
-        String key=String.format("%s-%s",className,method.getName());
+    public Object doHandler(Object proxy, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) throws Throwable {
+        String key = method.methodName;
         String interfaceUrl=callProperties.interfaceUrlMap.get(key);
         String returnName=callProperties.returnMap.get(key);
          Map<String, List<ParameterMeta>> parameterMetaMap=callProperties.parameterMetaMap;
         List<ParameterMeta> parameterMetas=parameterMetaMap.get(key);
-
         HttpHeaders headers = new HttpHeaders();
         MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
         headers.setContentType(type);

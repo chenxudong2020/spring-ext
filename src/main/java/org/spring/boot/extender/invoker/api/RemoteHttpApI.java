@@ -12,6 +12,7 @@ public interface RemoteHttpApI {
    Result getUser(Input input, @Url String url);
 
     @POST("/getUser2")
+    @Cache(expire = 10)
     Result getUser2(@Query("name") String name,@Query("aaa") String aaa);
 }
 

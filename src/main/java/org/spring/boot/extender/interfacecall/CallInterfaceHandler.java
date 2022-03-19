@@ -1,6 +1,7 @@
 package org.spring.boot.extender.interfacecall;
 
 
+import org.spring.boot.extender.interfacecall.annotation.Cache;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,6 +26,7 @@ public class CallInterfaceHandler  implements InvocationHandler {
         }
         String key=String.format("%s-%s",className,method.getName());
         MethodMeta methodMeta=callProperties.methodMetaMap.get(key);
-        return methodMeta.methodHandler.invoke(proxy,method,args,restTemplate,callProperties,className);
+        methodMeta.method=method;
+        return methodMeta.methodHandler.invoke(proxy,methodMeta,args,restTemplate,callProperties,className);
     }
 }
