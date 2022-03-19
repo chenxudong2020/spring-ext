@@ -11,8 +11,8 @@ public interface RemoteHttpApI {
     @POST
    Result getUser(Input input, @Url String url);
 
-    @GET("/getUser2?name={name}")
-    Result getUser2(String name);
+    @POST("/getUser2")
+    Result getUser2(@Query("name") String name,@Query("aaa") String aaa);
 }
 
 

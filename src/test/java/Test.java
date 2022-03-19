@@ -34,7 +34,7 @@ public class Test {
     @org.junit.Test
     public void test2(){
         String name="asdadsasd";
-        Result result=remoteHttpApI.getUser2(name);
+        Result result=remoteHttpApI.getUser2(name,"AAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
         System.out.println(result.getData().getName());
     }

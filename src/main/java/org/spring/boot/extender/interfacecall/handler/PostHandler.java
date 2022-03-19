@@ -39,20 +39,22 @@ public class PostHandler implements MethodHandler {
                 bodyCount = parameterMeta.bodyCount;
             }
             else if (null != parameterMeta.url) {
-                url = (String)args[parameterMeta.parameterCount];
-                listObjs.remove(parameterMeta.parameterCount);
+                if(args[parameterMeta.parameterCount] instanceof String){
+                    url = (String)args[parameterMeta.parameterCount];
+                    listObjs.remove(args[parameterMeta.parameterCount]);
+                }
             }
             else if (null != parameterMeta.query) {
                 if(url.indexOf("?")==-1){
                     url+="?";
                 }
-                url+=String.format("%s=%s",parameterMeta.query.value(),args[parameterMeta.parameterCount]);
-                listObjs.remove(parameterMeta.parameterCount);
+                url+=String.format("&%s=%s",parameterMeta.query.value(),args[parameterMeta.parameterCount]);
+                listObjs.remove(args[parameterMeta.parameterCount]);
             }
         }
         LOG.info(String.format("-->post:%s",url));
         args= listObjs.toArray();
-        HttpEntity formEntity = new HttpEntity<>(args.length==0?null:args[bodyCount], headers);
+        HttpEntity formEntity = new HttpEntity<>(args.length==0?null:args, headers);
         return restTemplate.postForObject(url, formEntity, Class.forName(returnName));
     }
 }

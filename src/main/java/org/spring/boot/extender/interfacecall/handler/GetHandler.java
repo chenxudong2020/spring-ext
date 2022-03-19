@@ -35,7 +35,16 @@ public class GetHandler implements MethodHandler  {
             if(null!=parameterMeta.head){
                 headers.add(parameterMeta.head.value(), args[parameterMeta.parameterCount].toString());
             } else if (null != parameterMeta.url) {
-                url = (String)args[parameterMeta.parameterCount];
+                if(args[parameterMeta.parameterCount] instanceof String) {
+                    url = (String) args[parameterMeta.parameterCount];
+                }
+            }
+            else if (null != parameterMeta.query) {
+                if(url.indexOf("?")==-1){
+                    url+="?";
+                }
+                url+=String.format("&%s=%s",parameterMeta.query.value(),args[parameterMeta.parameterCount]);
+
             }
             map.put(parameterMeta.parameterName,args[parameterMeta.parameterCount]);
 
