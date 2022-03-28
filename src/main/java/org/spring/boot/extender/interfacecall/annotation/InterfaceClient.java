@@ -9,4 +9,6 @@ import java.lang.annotation.*;
 public @interface InterfaceClient {
 
    String value() default "";
+
+   String[] scanBasePackages() default {};
 }

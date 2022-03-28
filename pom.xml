@@ -61,6 +61,16 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+       <!-- <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.1.1</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.minbox.framework</groupId>
+            <artifactId>minbox-sequence</artifactId>
+            <version>1.0.0.RELEASE</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -34,8 +34,9 @@ public class PostHandler implements MethodHandler {
         String url=interfaceUrl;
         List<Object> listObjs=new ArrayList<>(Arrays.asList(args));
         for (ParameterMeta parameterMeta : parameterMetas) {
-            if (null != parameterMeta.head)
+            if (null != parameterMeta.head){
                 headers.add(parameterMeta.head.value(), args[parameterMeta.parameterCount].toString());
+                listObjs.remove(args[parameterMeta.parameterCount]);}
             else if (null != parameterMeta.body) {
                 bodyCount = parameterMeta.bodyCount;
             }
@@ -55,7 +56,7 @@ public class PostHandler implements MethodHandler {
         }
         LOG.info(String.format("-->post:%s",url));
         args= listObjs.toArray();
-        HttpEntity formEntity = new HttpEntity<>(args.length==0?null:args, headers);
+        HttpEntity formEntity = new HttpEntity<>(args.length==0?null:args.length==1?args[0]:args, headers);
         return restTemplate.postForObject(url, formEntity, Class.forName(returnName));
     }
 }

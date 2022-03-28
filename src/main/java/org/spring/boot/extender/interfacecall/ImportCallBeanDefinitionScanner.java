@@ -45,7 +45,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
 
 
     @Override
-    protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
+    public Set<BeanDefinitionHolder> doScan(String... basePackages) {
         Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
         CallProperties callProperties = CallProperties.getInstance();
         GenericBeanDefinition genericBeanDefinition;

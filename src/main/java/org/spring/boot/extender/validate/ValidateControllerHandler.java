@@ -5,11 +5,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.boot.extender.validate.result.RestMessage;
+import org.spring.boot.extender.validate.result.Result;
+import org.spring.boot.extender.validate.result.ResultConvertor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -17,15 +24,15 @@ import java.lang.reflect.Method;
 /**
  * Post请求参数Validate框架验证
  */
-/*@Aspect
+@Aspect
 @Component
 @Primary
 @Order(Integer.MAX_VALUE)
-@ConditionalOnMissingBean(ImportValidateController.class)
-*/
 public class ValidateControllerHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ValidateControllerHandler.class);
+
+    private Class<? extends ResultConvertor> resultRestMessage;
 
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping))")
@@ -57,6 +64,7 @@ public class ValidateControllerHandler {
                                  ValidationEntity validationEntity = (ValidationEntity)annotation;
                                 if (validationEntity != null) {
                                     Class<?> cla = validationEntity.value();
+                                    resultRestMessage=validationEntity.result();
                                     String parmas = (String) param;
                                     ObjectMapper mapper=new ObjectMapper();
                                     validationResult = ValidationUtils.validateEntity(mapper.readValue(parmas,cla));
@@ -80,12 +88,20 @@ public class ValidateControllerHandler {
 
             }
             if (validationResult.isHasErrors()) {
-                return RestMessage.newInstance(false, String.join(",", validationResult.getErrorMsg().values()));
-            }
+                return convertResult(false, String.join(",", validationResult.getErrorMsg().values()));
+             }
         }
 
             result = joinPoint.proceed();
             return result;
+    }
+
+    protected Object convertResult(Boolean isSuccess, String message) throws Throwable {
+        Result result = new Result();
+        result.setSuccess(false);
+        result.setMessage(message);
+        ResultConvertor obj = resultRestMessage.newInstance();
+        return obj.convert(result);
     }
 
 
