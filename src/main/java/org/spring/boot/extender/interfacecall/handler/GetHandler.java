@@ -24,9 +24,9 @@ public class GetHandler implements MethodHandler  {
 
 
     @Override
-    public Object doHandler(Object proxy, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) throws Throwable {
+    public Object doHandler(Object proxy, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className, Map<String,String> interfaceUrlMap) throws Throwable {
         String key = method.methodName;
-        String interfaceUrl=callProperties.interfaceUrlMap.get(key);
+        String interfaceUrl=interfaceUrlMap.get(key);
         String returnName=callProperties.returnMap.get(key);
          Map<String, List<ParameterMeta>> parameterMetaMap=callProperties.parameterMetaMap;
         List<ParameterMeta> parameterMetas=parameterMetaMap.get(key);
@@ -36,6 +36,9 @@ public class GetHandler implements MethodHandler  {
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
         Map map=new HashMap();
         String url=interfaceUrl;
+        if(args==null){
+            args=new Object[]{};
+        }
         for(ParameterMeta parameterMeta:parameterMetas){
             if(null!=parameterMeta.head){
                 headers.add(parameterMeta.head.value(), args[parameterMeta.parameterCount].toString());

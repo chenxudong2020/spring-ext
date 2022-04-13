@@ -20,9 +20,12 @@ public class HandlerRequest {
 
 
     public void init(){
-        String name = parameter.getName();
-        parameterMeta.parameterName=name;
-        parameterMeta.parameterCount=parameterCount;
+        if(parameter!=null){
+            String name = parameter.getName();
+            parameterMeta.parameterName=name;
+            parameterMeta.parameterCount=parameterCount;
+        }
+
     }
 
     public int getParameterCount() {

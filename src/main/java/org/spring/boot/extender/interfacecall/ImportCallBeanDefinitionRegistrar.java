@@ -1,6 +1,5 @@
 package org.spring.boot.extender.interfacecall;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.boot.extender.interfacecall.annotation.InterfaceClient;
@@ -9,53 +8,64 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.MultiValueMap;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
+
 public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, ResourceLoaderAware, BeanClassLoaderAware,BeanFactoryAware {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportCallBeanDefinitionRegistrar.class);
     private ResourceLoader resourceLoader;
     private ClassLoader classLoader;
     private BeanFactory beanFactory;
-    private final String classBeanName="org.springframework.boot.autoconfigure.AutoConfigurationPackages";
+
+
 
 
 
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        AnnotationAttributes annAttr = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(InterfaceClient.class.getName()));
-        String[] basePackages = annAttr.getStringArray("basePackage");
-        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader);
-        AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
-        scanner.addIncludeFilter(annotationTypeFilter);
-        if (ObjectUtils.isEmpty(basePackages)) {
-            try {
-                Class.forName(classBeanName);
-                List<String> packages = AutoConfigurationPackages.get(this.beanFactory);
-                basePackages=packages.toArray(new String[packages.size()]);
-            }catch (Exception e){
-                basePackages = new String[]{ClassUtils.getPackageName(importingClassMetadata.getClassName())};
+        List<Object> listResource=new ArrayList<>();
+        List<String> basePackages=new ArrayList<>();
+        MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
+        if(map!=null){
+            List<Object> list=map.get("locations");
+            for(Object locationsObj:list){
+                String[] locations=(String[])locationsObj;
+                for(Object location:locations){
+                    listResource.add(location);
+                }
             }
-
+            List<Object> basePackageList=map.get("basePackage");
+            for(Object basePackageObject:basePackageList){
+                String[] basePackageString=(String[])basePackageObject;
+                for(String base:basePackageString){
+                    basePackages.add(base);
+                }
+            }
         }
 
-
-        scanner.doScan(basePackages);
-
-
+        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource);
+        AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
+        scanner.addIncludeFilter(annotationTypeFilter);
+        basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
+        String[] packages=basePackages.toArray(new String[basePackages.size()]);
+        scanner.doScan(packages);
 
     }
 

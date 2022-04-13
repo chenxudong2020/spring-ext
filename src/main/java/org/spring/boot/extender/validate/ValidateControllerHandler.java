@@ -1,7 +1,6 @@
 package org.spring.boot.extender.validate;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -10,13 +9,12 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spring.boot.extender.validate.result.RestMessage;
 import org.spring.boot.extender.validate.result.Result;
 import org.spring.boot.extender.validate.result.ResultConvertor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -25,7 +23,6 @@ import java.lang.reflect.Method;
  * Post请求参数Validate框架验证
  */
 @Aspect
-@Component
 @Primary
 @Order(Integer.MAX_VALUE)
 public class ValidateControllerHandler {
@@ -35,7 +32,7 @@ public class ValidateControllerHandler {
     private Class<? extends ResultConvertor> resultRestMessage;
 
 
-    @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping))")
+    @Pointcut("@annotation(org.springframework.web.bind.annotation.RequestMapping))")
     public void controllerAspect() {
     }
 
@@ -50,6 +47,11 @@ public class ValidateControllerHandler {
                 if (param instanceof String) {
                     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
                     Method method = signature.getMethod();
+                    //TODO 判断是否要POST请求
+                    RequestMapping requestMapping=method.getAnnotation(RequestMapping.class);
+                    if(!HttpMethod.POST.equals(requestMapping.method())){
+                        break;
+                    }
                     Annotation[][] annotations = method.getParameterAnnotations();
                     for (int i = 0; i < annotations.length; i++) {
                         Annotation[] paramAnn = annotations[i];
