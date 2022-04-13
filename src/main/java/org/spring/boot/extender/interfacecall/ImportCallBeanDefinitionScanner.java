@@ -137,10 +137,8 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
     @Override
     protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
         boolean isCandidate = false;
-        if (beanDefinition.getMetadata().isIndependent()) {
-            // if (!(beanDefinition.getMetadata() instanceof AnnotationMetadata)) {
+        if (beanDefinition.getMetadata().isIndependent()&&beanDefinition.getMetadata().isInterface()) {
             isCandidate = true;
-            // }
         }
         return isCandidate;
     }
