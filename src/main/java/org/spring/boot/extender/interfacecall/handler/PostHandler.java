@@ -22,21 +22,8 @@ public class PostHandler implements MethodHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PostHandler.class);
 
     @Override
-    public Object doHandler(Object proxy, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className, Map<String,String> interfaceUrlMap) throws Throwable {
-        String key = method.methodName;
-        String interfaceUrl = interfaceUrlMap.get(key);
-        String returnName = callProperties.returnMap.get(key);
-        Map<String, List<ParameterMeta>> parameterMetaMap = callProperties.parameterMetaMap;
-        List<ParameterMeta> parameterMetas = parameterMetaMap.get(key);
+    public Object doHandler(List<ParameterMeta> parameterMetas,HttpHeaders headers,Object args[],String url,String returnName,RestTemplate restTemplate,MediaType type) throws Throwable {
         int bodyCount = 0;
-        HttpHeaders headers = new HttpHeaders();
-        MediaType type = MediaType.parseMediaType(method.type==null?MediaType.APPLICATION_JSON_VALUE:method.type.value());
-        headers.setContentType(type);
-        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
-        String url = interfaceUrl;
-        if(args==null){
-            args=new Object[]{};
-        }
         List<Object> listObjs = new ArrayList<>(Arrays.asList(args));
         for (ParameterMeta parameterMeta : parameterMetas) {
             if (null != parameterMeta.head) {
