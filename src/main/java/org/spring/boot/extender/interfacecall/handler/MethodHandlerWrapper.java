@@ -9,14 +9,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HandlerProxy implements InvocationHandler, MethodHandler {
+public class MethodHandlerWrapper implements MethodHandler {
 
 
     private MethodHandler methodHandler;
@@ -26,7 +25,7 @@ public class HandlerProxy implements InvocationHandler, MethodHandler {
     private CallProperties callProperties;
     private String className;
 
-    public HandlerProxy(MethodHandler methodHandler, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) {
+    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) {
         this.methodHandler = methodHandler;
         this.methodMeta = method;
         this.args = args;
@@ -35,7 +34,7 @@ public class HandlerProxy implements InvocationHandler, MethodHandler {
         this.className = className;
     }
 
-    @Override
+
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(this, args);

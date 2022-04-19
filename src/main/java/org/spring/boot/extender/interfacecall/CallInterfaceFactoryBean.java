@@ -25,24 +25,11 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, ApplicationC
     private Class<T> callInterface;
     private ApplicationContext applicationContext;
     private Environment environment;
+    @Deprecated
     private List<Object> listResource;
 
     @Override
     public void setEnvironment(Environment environment) {
-
-         //加载系统中的property文件到environment
-        for(Object resourceStringObject:listResource){
-            DefaultResourceLoader defaultResourceLoader=new DefaultResourceLoader();
-            Resource resource=defaultResourceLoader.getResource((String)resourceStringObject);
-            ConfigurableEnvironment configurableEnvironment=(ConfigurableEnvironment)environment;
-            try {
-                configurableEnvironment.getPropertySources().addFirst(new ResourcePropertySource(new EncodedResource(resource)));
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-
-
         CallProperties callProperties = CallProperties.getInstance();
         Map<String, String> urlMap = new ConcurrentHashMap<>();
         callProperties.interfaceUrlMap.forEach((x, y) -> {

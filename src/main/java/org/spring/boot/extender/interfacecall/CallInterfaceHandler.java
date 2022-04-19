@@ -1,16 +1,13 @@
 package org.spring.boot.extender.interfacecall;
 
 
-import org.spring.boot.extender.interfacecall.annotation.Cache;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
-import org.spring.boot.extender.interfacecall.handler.HandlerProxy;
 import org.spring.boot.extender.interfacecall.handler.MethodHandler;
-import org.springframework.core.env.Environment;
+import org.spring.boot.extender.interfacecall.handler.MethodHandlerWrapper;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Map;
 
 public class CallInterfaceHandler implements InvocationHandler {
@@ -36,11 +33,8 @@ public class CallInterfaceHandler implements InvocationHandler {
         MethodMeta methodMeta = callProperties.methodMetaMap.get(key);
         methodMeta.method = method;
         MethodHandler methodHandler = methodMeta.methodHandler;
-        HandlerProxy handlerProxy = new HandlerProxy(methodHandler, methodMeta, args, restTemplate, callProperties, className);
-        MethodHandler methodHandlerProxy = (MethodHandler) Proxy.newProxyInstance(this.getClass().getClassLoader(), methodHandler.getClass().getInterfaces(), handlerProxy);
-        return methodHandlerProxy.invoke(methodHandler, methodMeta, args, restTemplate, callProperties, className);
-
-
+        MethodHandlerWrapper methodHandlerWrapper = new MethodHandlerWrapper(methodHandler, methodMeta, args, restTemplate, callProperties, className);
+        return methodHandlerWrapper.invoke(proxy,method,args);
 
     }
 }
