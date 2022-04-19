@@ -5,10 +5,12 @@ import org.spring.boot.extender.interfacecall.EnableInterfaceCall;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@EnableInterfaceCall(locations={"classpath:my.properties"})
+@EnableInterfaceCall
+@PropertySource(name="my",value = "classpath:my.properties")
 public class Main {
 
     @Bean

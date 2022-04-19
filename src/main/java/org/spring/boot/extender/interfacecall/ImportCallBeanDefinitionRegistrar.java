@@ -23,6 +23,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -32,12 +33,23 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
     private ResourceLoader resourceLoader;
     private ClassLoader classLoader;
     private BeanFactory beanFactory;
+    private String[] basePackage;
 
 
+    public String[] getBasePackage() {
+        return basePackage;
+    }
 
+    public void setBasePackage(String[] basePackage) {
+        this.basePackage = basePackage;
+    }
 
-
-
+    /**
+     * 默认EnableInterfaceCall注解类所在包下的所有类
+     * 或者配置basePackage属性的包下面的所有类
+     * @param importingClassMetadata
+     * @param registry
+     */
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         List<Object> listResource=new ArrayList<>();
@@ -58,6 +70,10 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
                     basePackages.add(base);
                 }
             }
+        }
+
+        if(basePackage!=null){
+            basePackages.addAll(Arrays.asList(basePackage));
         }
 
         ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource);
