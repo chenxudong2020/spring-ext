@@ -9,16 +9,11 @@ import org.spring.boot.extender.interfacecall.handler.PostHandler;
 import org.spring.boot.extender.interfacecall.paramhandler.ParamHandler;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -29,9 +24,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScanner implements ResourceLoaderAware, EnvironmentAware {
+public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
     private final ClassLoader classLoader;
-    private Environment environment;
+
     private List<Object> listResource;
 
 
@@ -108,7 +103,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                 } else if (methodMeta.post == null && methodMeta.get != null) {
                     methodMeta.methodHandler = new GetHandler();
                 } else {
-                    throw new RuntimeException(x.getName() + "post和get必须注解一个方法!");
+                    throw new RuntimeException(x.getName() + "post和get需要注解一个方法!");
                 }
                 callProperties.methodMetaMap.put(key, methodMeta);
                 String interfaceUrlSuffix = null;
@@ -122,7 +117,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
                     interfaceUrl = String.format("%s/%s", InterfaceClientValue, interfaceUrlSuffix);
                 }
                 String returnName = x.getReturnType().getName();
-                callProperties.interfaceUrlMap.put(key, interfaceUrl);
+                callProperties.interfaceUrlMap.put(key,interfaceUrl);
                 callProperties.returnMap.put(key, returnName);
 
             }
@@ -144,10 +139,4 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
     }
 
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        super.setEnvironment(environment);
-        this.environment = environment;
-
-    }
 }

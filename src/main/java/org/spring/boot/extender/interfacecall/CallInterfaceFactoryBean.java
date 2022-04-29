@@ -19,43 +19,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, ApplicationContextAware, EnvironmentAware {
+public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, ApplicationContextAware,EnvironmentAware {
 
 
     private Class<T> callInterface;
     private ApplicationContext applicationContext;
     private Environment environment;
-    @Deprecated
-    private List<Object> listResource;
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        CallProperties callProperties = CallProperties.getInstance();
-        Map<String, String> urlMap = new ConcurrentHashMap<>();
-        callProperties.interfaceUrlMap.forEach((x, y) -> {
-            y = environment.resolvePlaceholders(y);
-            urlMap.put(x, y);
-        });
-        callProperties.interfaceUrlMap.putAll(urlMap);
-    }
+
 
     /**
      * 必须提供构造方法
      *
      * @param callInterface
      */
+
     public CallInterfaceFactoryBean(Class<T> callInterface, List<Object> listResource) {
+
         this.callInterface = callInterface;
-        this.listResource=listResource;
+
     }
 
     @Override
     public T getObject() throws Exception {
         CallProperties callProperties = CallProperties.getInstance();
-        RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
+
         return (T) Proxy.newProxyInstance(callInterface.getClassLoader(),
                 new Class<?>[]{callInterface},
-                new CallInterfaceHandler(restTemplate, callProperties.interfaceUrlMap,callInterface.getName())
+                new CallInterfaceHandler(applicationContext, callProperties.interfaceUrlMap,callInterface.getName())
 
         );
 
@@ -74,6 +65,26 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, ApplicationC
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+        this.applicationContext=applicationContext;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment=environment;
+        this.resolvePlaceholders();
+    }
+
+
+
+    protected void resolvePlaceholders(){
+        CallProperties callProperties = CallProperties.getInstance();
+        if(callProperties.isCached){return;}
+        Map<String, String> urlMap = new ConcurrentHashMap<>();
+        callProperties.interfaceUrlMap.forEach((x, y) -> {
+            y = environment.resolvePlaceholders(y);
+            urlMap.put(x, y);
+        });
+        callProperties.interfaceUrlMap.putAll(urlMap);
+        callProperties.isCached=true;
     }
 }

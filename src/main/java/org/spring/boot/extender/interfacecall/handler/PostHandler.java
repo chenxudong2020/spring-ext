@@ -8,6 +8,7 @@ import org.spring.boot.extender.interfacecall.CallProperties;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.springframework.cglib.beans.BeanMap;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,7 +23,7 @@ public class PostHandler implements MethodHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PostHandler.class);
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas,HttpHeaders headers,Object args[],String url,String returnName,RestTemplate restTemplate,MediaType type) throws Throwable {
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, ApplicationContext applicationContext, MediaType type) throws Throwable {
         int bodyCount = 0;
         List<Object> listObjs = new ArrayList<>(Arrays.asList(args));
         for (ParameterMeta parameterMeta : parameterMetas) {
@@ -69,6 +70,7 @@ public class PostHandler implements MethodHandler {
 
         }
         HttpEntity formEntity = new HttpEntity<>(args.length == 0 ? null : args.length == 1 ? args[0] : args, headers);
+        RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
         return restTemplate.postForObject(url, formEntity, Class.forName(returnName));
     }
 }

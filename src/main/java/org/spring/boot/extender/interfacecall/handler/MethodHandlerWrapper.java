@@ -5,6 +5,7 @@ import org.spring.boot.extender.interfacecall.annotation.Cache;
 import org.spring.boot.extender.interfacecall.entity.CacheMeta;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
@@ -21,15 +22,16 @@ public class MethodHandlerWrapper implements MethodHandler {
     private MethodHandler methodHandler;
     private MethodMeta methodMeta;
     private Object[] args;
-    private RestTemplate restTemplate;
+
+    private ApplicationContext applicationContext;
     private CallProperties callProperties;
     private String className;
 
-    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, RestTemplate restTemplate, CallProperties callProperties, String className) {
+    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, ApplicationContext applicationContext, CallProperties callProperties, String className) {
         this.methodHandler = methodHandler;
         this.methodMeta = method;
         this.args = args;
-        this.restTemplate = restTemplate;
+        this.applicationContext = applicationContext;
         this.callProperties = callProperties;
         this.className = className;
     }
@@ -77,12 +79,12 @@ public class MethodHandlerWrapper implements MethodHandler {
         if (args == null) {
             args = new Object[]{};
         }
-        return this.doHandler(parameterMetas, headers, args, url, returnName, restTemplate, type);
+        return this.doHandler(parameterMetas, headers, args, url, returnName, applicationContext, type);
     }
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, RestTemplate restTemplate, MediaType type) throws Throwable {
-        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, restTemplate, type);
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, ApplicationContext applicationContext, MediaType type) throws Throwable {
+        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, applicationContext, type);
     }
 }

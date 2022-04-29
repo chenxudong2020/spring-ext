@@ -17,6 +17,8 @@ public class CallProperties {
     public Map<String,String> returnMap=new ConcurrentHashMap<>();
     public Map<String, List<ParameterMeta>> parameterMetaMap=new ConcurrentHashMap<>();
 
+    public boolean isCached;
+
     private CallProperties(){};
 
 

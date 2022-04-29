@@ -7,6 +7,7 @@ import org.spring.boot.extender.interfacecall.annotation.Cache;
 import org.spring.boot.extender.interfacecall.entity.CacheMeta;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,7 +25,7 @@ public class GetHandler implements MethodHandler  {
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas,HttpHeaders headers,Object args[],String url,String returnName,RestTemplate restTemplate,MediaType type) throws Throwable {
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, ApplicationContext applicationContext, MediaType type) throws Throwable {
         Map map=new HashMap();
         for(ParameterMeta parameterMeta:parameterMetas){
             if(null!=parameterMeta.head){
@@ -46,6 +47,7 @@ public class GetHandler implements MethodHandler  {
         }
         LOG.info(String.format("-->get:%s",url));
         HttpEntity formEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
         return restTemplate.exchange(url, HttpMethod.GET,formEntity,Class.forName(returnName),map).getBody();
     }
 }
