@@ -28,25 +28,16 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, ApplicationC
 
 
 
-    /**
-     * 必须提供构造方法
-     *
-     * @param callInterface
-     */
-
     public CallInterfaceFactoryBean(Class<T> callInterface, List<Object> listResource) {
-
         this.callInterface = callInterface;
 
     }
 
     @Override
-    public T getObject() throws Exception {
-        CallProperties callProperties = CallProperties.getInstance();
-
+    public T getObject(){
         return (T) Proxy.newProxyInstance(callInterface.getClassLoader(),
                 new Class<?>[]{callInterface},
-                new CallInterfaceHandler(applicationContext, callProperties.interfaceUrlMap,callInterface.getName())
+                new CallInterfaceHandler(applicationContext,callInterface.getName())
 
         );
 

@@ -12,15 +12,15 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 public class CallInterfaceHandler implements InvocationHandler {
-    private ApplicationContext applicationContext;
-    private String className;
-    private Map<String,String> interfaceUrlMap;
+    private final ApplicationContext applicationContext;
+    private final String className;
 
 
-    public CallInterfaceHandler(ApplicationContext applicationContext, Map<String,String> interfaceUrlMap, String className) {
+
+    public CallInterfaceHandler(ApplicationContext applicationContext, String className) {
         this.applicationContext = applicationContext;
         this.className = className;
-        this.interfaceUrlMap=interfaceUrlMap;
+
 
     }
 
