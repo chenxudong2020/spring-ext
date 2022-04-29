@@ -28,7 +28,7 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>, ApplicationC
 
 
 
-    public CallInterfaceFactoryBean(Class<T> callInterface, List<Object> listResource) {
+    public CallInterfaceFactoryBean(Class<T> callInterface) {
         this.callInterface = callInterface;
 
     }

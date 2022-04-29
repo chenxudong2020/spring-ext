@@ -27,13 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
     private final ClassLoader classLoader;
 
-    private List<Object> listResource;
 
 
-    public ImportCallBeanDefinitionScanner(BeanDefinitionRegistry registry, ClassLoader classLoader,List<Object> listResource) {
+    public ImportCallBeanDefinitionScanner(BeanDefinitionRegistry registry, ClassLoader classLoader) {
         super(registry, false);
         this.classLoader = classLoader;
-        this.listResource=listResource;
+
 
     }
 
@@ -57,7 +56,6 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
 
             genericBeanDefinition = (GenericBeanDefinition) holder.getBeanDefinition();
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(Objects.requireNonNull(genericBeanDefinition.getBeanClassName()));
-            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(listResource);
             genericBeanDefinition.setBeanClass(CallInterfaceFactoryBean.class);
 
 

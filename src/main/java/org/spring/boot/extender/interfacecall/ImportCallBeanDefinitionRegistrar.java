@@ -46,17 +46,10 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
      */
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        List<Object> listResource=new ArrayList<>();
+
         List<String> basePackages=new ArrayList<>();
         MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
         if(map!=null){
-            List<Object> list=map.get("locations");
-            for(Object locationsObj:list){
-                String[] locations=(String[])locationsObj;
-                for(Object location:locations){
-                    listResource.add(location);
-                }
-            }
             List<Object> basePackageList=map.get("basePackage");
             for(Object basePackageObject:basePackageList){
                 String[] basePackageString=(String[])basePackageObject;
@@ -70,7 +63,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
             basePackages.addAll(Arrays.asList(basePackage));
         }
 
-        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource);
+        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
         scanner.addIncludeFilter(annotationTypeFilter);
         basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));

@@ -15,5 +15,5 @@ import java.lang.annotation.*;
 public @interface EnableInterfaceCall {
     String[] basePackage() default {};
 
-    String[] locations() default {};
+
 }
