@@ -9,7 +9,7 @@ POST
 Query
 Url
 注解
-spring-boot-extender 快速调用第三方接口的框架
+spring-ext 快速调用第三方接口的框架
 
 <dependency>
 <groupId>org.spring.boot.extender</groupId>
