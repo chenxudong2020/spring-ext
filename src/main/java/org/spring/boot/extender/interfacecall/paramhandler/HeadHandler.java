@@ -19,7 +19,7 @@ public class HeadHandler extends HandlerChain {
     }
 
     @Override
-    public void handler(HandlerRequest request) {
+    public HandlerChain handler(HandlerRequest request) {
         ParameterMeta parameterMeta = request.getParameterMeta();
         Parameter parameter = request.getParameter();
         Head head = parameter.getAnnotation(Head.class);
@@ -27,9 +27,9 @@ public class HeadHandler extends HandlerChain {
         if (null != head) {
             parameterMeta.head = head;
         }
-        if (handler != null) {
-            handler.handler(request);
-        }
+
+        return handler;
+
     }
 
     @Override

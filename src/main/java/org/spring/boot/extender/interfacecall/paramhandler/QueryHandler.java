@@ -15,7 +15,7 @@ public class QueryHandler extends HandlerChain{
         this.handler = handler;
     }
     @Override
-    public void handler(HandlerRequest request) {
+    public HandlerChain handler(HandlerRequest request) {
         ParameterMeta parameterMeta=request.getParameterMeta();
         Parameter parameter=request.getParameter();
         Query query = parameter.getAnnotation(Query.class);
@@ -23,9 +23,8 @@ public class QueryHandler extends HandlerChain{
         if (null != query) {
             parameterMeta.query=query;
         }
-        if(handler!=null){
-            handler.handler(request);
-        }
+
+         return handler;
 
     }
 

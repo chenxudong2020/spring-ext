@@ -2,6 +2,7 @@ package org.spring.boot.extender.interfacecall;
 
 
 import org.spring.boot.extender.interfacecall.annotation.*;
+import org.spring.boot.extender.interfacecall.entity.Constant;
 import org.spring.boot.extender.interfacecall.entity.MethodMeta;
 import org.spring.boot.extender.interfacecall.entity.ParameterMeta;
 import org.spring.boot.extender.interfacecall.handler.GetHandler;
@@ -67,16 +68,14 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
     private MethodMeta initMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
         List<ParameterMeta> list=new ArrayList<>();
         Parameter[] parameters = method.getParameters();
-        ParamHandler paramHandler = null;
+        ParamHandler paramHandler  = new ParamHandler();
         int parameterCount = 0;
         for (Parameter parameter : parameters) {
-            paramHandler = new ParamHandler();
             paramHandler.handler(beanDefinition, InterfaceClientValue, method, parameter, parameterCount);
             list.add(paramHandler.getHandlerRequest().getParameterMeta());
             parameterCount += 1;
         }
         if (paramHandler == null) {
-            paramHandler = new ParamHandler();
             paramHandler.handler(beanDefinition, InterfaceClientValue, method, null, parameterCount);
         }
         String key = paramHandler.getHandlerRequest().getKey();
@@ -101,7 +100,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         String interfaceUrlSuffix = methodMeta.post.value();
         String interfaceUrl = interfaceUrlSuffix;
         if (!StringUtils.isEmpty(InterfaceClientValue)) {
-            interfaceUrl = String.format("%s/%s", InterfaceClientValue, interfaceUrlSuffix);
+            interfaceUrl = String.format(Constant.urlFormat, InterfaceClientValue, interfaceUrlSuffix);
         }
 
         callProperties.interfaceUrlMap.put(methodMeta.methodName, interfaceUrl);
@@ -114,7 +113,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         String interfaceUrlSuffix = methodMeta.get.value();
         String interfaceUrl = interfaceUrlSuffix;
         if (!StringUtils.isEmpty(InterfaceClientValue)) {
-            interfaceUrl = String.format("%s/%s", InterfaceClientValue, interfaceUrlSuffix);
+            interfaceUrl = String.format(Constant.urlFormat, InterfaceClientValue, interfaceUrlSuffix);
         }
         callProperties.interfaceUrlMap.put(methodMeta.methodName, interfaceUrl);
 

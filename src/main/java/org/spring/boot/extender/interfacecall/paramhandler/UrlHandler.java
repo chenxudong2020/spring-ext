@@ -16,7 +16,7 @@ public class UrlHandler extends HandlerChain{
     }
 
     @Override
-    public void handler(HandlerRequest request) {
+    public HandlerChain handler(HandlerRequest request) {
         ParameterMeta parameterMeta=request.getParameterMeta();
         Parameter parameter=request.getParameter();
         Url url = parameter.getAnnotation(Url.class);
@@ -24,9 +24,7 @@ public class UrlHandler extends HandlerChain{
         if (null != url) {
             parameterMeta.url=url;
         }
-        if(handler!=null){
-            handler.handler(request);
-        }
+         return handler;
     }
 
     @Override

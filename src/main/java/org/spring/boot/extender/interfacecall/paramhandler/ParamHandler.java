@@ -1,5 +1,6 @@
 package org.spring.boot.extender.interfacecall.paramhandler;
 
+import org.spring.boot.extender.interfacecall.entity.Constant;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 
 import java.lang.reflect.Method;
@@ -23,19 +24,21 @@ public class ParamHandler {
             urlHandler.setNext(queryHandler);
             HandlerRequest handlerRequest=new HandlerRequest();
             handlerRequest.setBeanDefinition(beanDefinition);
-            String key = String.format("%s-%s", beanDefinition.getBeanClassName(), method.getName());
+            String key = String.format(Constant.keyFormat, beanDefinition.getBeanClassName(), method.getName());
             handlerRequest.setKey(key);
             handlerRequest.setInterfaceClientValue(InterfaceClientValue);
             handlerRequest.setParameter(parameter);
-
             handlerRequest.setParameterCount(parameterCount);
             handlerRequest.init();
-            bodyHandler.handler(handlerRequest);
+            HandlerChain handlerChain=bodyHandler.handler(handlerRequest);
+            while(handlerChain!=null){
+                handlerChain=handlerChain.handler(handlerRequest);
+            }
             this.handlerRequest=handlerRequest;
         }else{
             HandlerRequest handlerRequest=new HandlerRequest();
             handlerRequest.setBeanDefinition(beanDefinition);
-            String key = String.format("%s-%s", beanDefinition.getBeanClassName(), method.getName());
+            String key = String.format(Constant.keyFormat, beanDefinition.getBeanClassName(), method.getName());
             handlerRequest.setKey(key);
             handlerRequest.setInterfaceClientValue(InterfaceClientValue);
             handlerRequest.setParameterCount(parameterCount);
