@@ -3,6 +3,8 @@ package org.spring.ext.interfacecall;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.ext.interfacecall.annotation.InterfaceClient;
+import org.spring.ext.interfacecall.handler.GetHandler;
+import org.spring.ext.interfacecall.handler.PostHandler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -80,9 +82,21 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         GenericBeanDefinition genericBeanDefinition =new GenericBeanDefinition();
         genericBeanDefinition.setBeanClass(CallProperties.class);
         genericBeanDefinition.setBeanClassName(CallProperties.class.getName());
-        genericBeanDefinition.setScope("singleton");
         genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
         registry.registerBeanDefinition(CallProperties.class.getName(),genericBeanDefinition);
+
+
+
+        GenericBeanDefinition genericBeanDefinitionPost=new GenericBeanDefinition();
+        genericBeanDefinitionPost.setBeanClass(PostHandler.class);
+        genericBeanDefinitionPost.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        registry.registerBeanDefinition(PostHandler.class.getName(),genericBeanDefinitionPost);
+
+        GenericBeanDefinition genericBeanDefinitionGet=new GenericBeanDefinition();
+        genericBeanDefinitionGet.setBeanClass(GetHandler.class);
+        genericBeanDefinitionGet.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        registry.registerBeanDefinition(GetHandler.class.getName(),genericBeanDefinitionGet);
+
 
         ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);

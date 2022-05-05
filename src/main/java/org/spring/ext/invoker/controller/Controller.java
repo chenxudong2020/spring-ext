@@ -16,7 +16,7 @@ public class Controller {
     public Result getUser(@RequestBody Input input){
         String id=input.getId();
         User user=new User();
-        user.setName("1的name");
+        user.setName(id);
         Result result=new Result();
         result.setCode("200");
         result.setMessage("成功了");

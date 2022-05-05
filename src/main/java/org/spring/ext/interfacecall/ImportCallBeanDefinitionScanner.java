@@ -101,7 +101,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
 
     private void initPostMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
         MethodMeta methodMeta = initMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
-        methodMeta.methodHandler=new PostHandler();
+        methodMeta.methodHandler=beanFactory.getBean(PostHandler.class);
         String interfaceUrlSuffix = methodMeta.post.value();
         String interfaceUrl = interfaceUrlSuffix;
         if (!StringUtils.isEmpty(InterfaceClientValue)) {
@@ -114,7 +114,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
 
     private void initGetMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
         MethodMeta methodMeta = initMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
-        methodMeta.methodHandler=new GetHandler();
+        methodMeta.methodHandler=beanFactory.getBean(GetHandler.class);
         String interfaceUrlSuffix = methodMeta.get.value();
         String interfaceUrl = interfaceUrlSuffix;
         if (!StringUtils.isEmpty(InterfaceClientValue)) {
