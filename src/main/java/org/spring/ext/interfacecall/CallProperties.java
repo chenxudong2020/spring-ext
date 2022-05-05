@@ -18,12 +18,12 @@ public class CallProperties {
 
     public boolean isCached;
 
-    private CallProperties(){};
+   /* private CallProperties(){};
 
 
     private static CallProperties callProperties=new CallProperties();
 
     public static CallProperties getInstance(){
         return callProperties;
-    }
+    }*/
 }

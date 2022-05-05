@@ -9,6 +9,7 @@ import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
 import org.spring.ext.interfacecall.paramhandler.ParamHandler;
 import org.spring.ext.interfacecall.annotation.*;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -30,11 +31,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScanner implements ResourceLoaderAware {
     private final ClassLoader classLoader;
-
-
-    public ImportCallBeanDefinitionScanner(BeanDefinitionRegistry registry, ClassLoader classLoader) {
+    private List<Object> listResource;
+    private BeanFactory beanFactory;
+    public ImportCallBeanDefinitionScanner(BeanDefinitionRegistry registry, ClassLoader classLoader,List<Object> listResource, BeanFactory beanFactory) {
         super(registry, false);
         this.classLoader = classLoader;
+        this.listResource=listResource;
+        this.beanFactory=beanFactory;
 
 
     }
@@ -48,7 +51,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
     @Override
     protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
         Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
-        CallProperties callProperties = CallProperties.getInstance();
+        CallProperties callProperties = beanFactory.getBean(CallProperties.class);
         GenericBeanDefinition genericBeanDefinition;
         for (BeanDefinitionHolder holder : beanDefinitions) {
             AnnotatedBeanDefinition beanDefinition = (AnnotatedBeanDefinition) holder.getBeanDefinition();
@@ -57,6 +60,8 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
             callProperties.parameterMetaMap.putAll(getParameterMeta(beanDefinition, value));
             genericBeanDefinition = (GenericBeanDefinition) holder.getBeanDefinition();
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(Objects.requireNonNull(genericBeanDefinition.getBeanClassName()));
+            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(listResource);
+            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory);
             genericBeanDefinition.setBeanClass(CallInterfaceFactoryBean.class);
 
 
@@ -121,7 +126,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
     }
 
     private Map<String, List<ParameterMeta>> getParameterMeta(AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue) {
-        CallProperties callProperties = CallProperties.getInstance();
+        CallProperties callProperties =  beanFactory.getBean(CallProperties.class);
         Class beanClass =null;
         try {
              beanClass = ClassUtils.forName(beanDefinition.getBeanClassName(), classLoader);

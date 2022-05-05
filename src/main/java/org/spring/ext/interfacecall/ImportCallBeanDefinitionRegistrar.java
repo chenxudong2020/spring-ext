@@ -7,7 +7,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.io.ResourceLoader;
@@ -46,10 +49,20 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
      */
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-
+        List<Object> listResource=new ArrayList<>();
         List<String> basePackages=new ArrayList<>();
         MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
         if(map!=null){
+            List<Object> list=map.get("locations");
+            if(list!=null){
+                for(Object locationsObj:list){
+                    String[] locations=(String[])locationsObj;
+                    for(Object location:locations){
+                        listResource.add(location);
+                    }
+                }
+            }
+
             List<Object> basePackageList=map.get("basePackage");
             for(Object basePackageObject:basePackageList){
                 String[] basePackageString=(String[])basePackageObject;
@@ -63,7 +76,15 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
             basePackages.addAll(Arrays.asList(basePackage));
         }
 
-        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader);
+
+        GenericBeanDefinition genericBeanDefinition =new GenericBeanDefinition();
+        genericBeanDefinition.setBeanClass(CallProperties.class);
+        genericBeanDefinition.setBeanClassName(CallProperties.class.getName());
+        genericBeanDefinition.setScope("singleton");
+        genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        registry.registerBeanDefinition(CallProperties.class.getName(),genericBeanDefinition);
+
+        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
         scanner.addIncludeFilter(annotationTypeFilter);
         basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));

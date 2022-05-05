@@ -5,6 +5,7 @@ import org.spring.ext.interfacecall.annotation.Cache;
 import org.spring.ext.interfacecall.entity.CacheMeta;
 import org.spring.ext.interfacecall.entity.MethodMeta;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,15 +23,15 @@ public class MethodHandlerWrapper implements MethodHandler {
     private MethodMeta methodMeta;
     private Object[] args;
 
-    private ApplicationContext applicationContext;
+    private BeanFactory beanFactory;
     private CallProperties callProperties;
     private String className;
 
-    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, ApplicationContext applicationContext, CallProperties callProperties, String className) {
+    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, BeanFactory beanFactory, CallProperties callProperties, String className) {
         this.methodHandler = methodHandler;
         this.methodMeta = method;
         this.args = args;
-        this.applicationContext = applicationContext;
+        this.beanFactory = beanFactory;
         this.callProperties = callProperties;
         this.className = className;
     }
@@ -78,12 +79,12 @@ public class MethodHandlerWrapper implements MethodHandler {
         if (args == null) {
             args = new Object[]{};
         }
-        return this.doHandler(parameterMetas, headers, args, url, returnName, applicationContext, type);
+        return this.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type);
     }
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, ApplicationContext applicationContext, MediaType type) throws Throwable {
-        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, applicationContext, type);
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type) throws Throwable {
+        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type);
     }
 }
