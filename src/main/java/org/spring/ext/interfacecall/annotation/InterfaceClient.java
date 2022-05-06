@@ -1,5 +1,7 @@
 package org.spring.ext.interfacecall.annotation;
 
+import org.spring.ext.interfacecall.APIRestTemplate;
+
 import java.lang.annotation.*;
 
 
@@ -9,4 +11,6 @@ import java.lang.annotation.*;
 public @interface InterfaceClient {
 
    String value() default "";
+
+   Class<?> callBackClass() default java.lang.Class.class;
 }
