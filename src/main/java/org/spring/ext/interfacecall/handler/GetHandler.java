@@ -2,6 +2,7 @@ package org.spring.ext.interfacecall.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spring.ext.interfacecall.APIRestTemplate;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -20,7 +21,7 @@ public class GetHandler implements MethodHandler  {
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type) throws Throwable {
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type,Class<? extends APIRestTemplate> restTemplateClass) throws Throwable {
         Map map=new HashMap();
         for(ParameterMeta parameterMeta:parameterMetas){
             if(null!=parameterMeta.head){
@@ -42,7 +43,7 @@ public class GetHandler implements MethodHandler  {
         }
         LOG.info(String.format("-->get:%s",url));
         HttpEntity formEntity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = beanFactory.getBean(RestTemplate.class);
+        APIRestTemplate restTemplate =beanFactory.getBean(restTemplateClass);
         return restTemplate.exchange(url, HttpMethod.GET,formEntity,Class.forName(returnName),map).getBody();
     }
 }

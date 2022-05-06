@@ -33,11 +33,13 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
     private final ClassLoader classLoader;
     private List<Object> listResource;
     private BeanFactory beanFactory;
-    public ImportCallBeanDefinitionScanner(BeanDefinitionRegistry registry, ClassLoader classLoader,List<Object> listResource, BeanFactory beanFactory) {
+    private Class<? extends APIRestTemplate> restTemplateClass;
+    public ImportCallBeanDefinitionScanner(BeanDefinitionRegistry registry, ClassLoader classLoader,List<Object> listResource, BeanFactory beanFactory,Class<? extends APIRestTemplate> restTemplateClass) {
         super(registry, false);
         this.classLoader = classLoader;
         this.listResource=listResource;
         this.beanFactory=beanFactory;
+        this.restTemplateClass=restTemplateClass;
 
 
     }
@@ -62,6 +64,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(Objects.requireNonNull(genericBeanDefinition.getBeanClassName()));
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(listResource);
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory);
+            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(restTemplateClass);
             genericBeanDefinition.setBeanClass(CallInterfaceFactoryBean.class);
 
 

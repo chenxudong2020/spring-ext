@@ -10,18 +10,17 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,29 +54,13 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         List<Object> listResource=new ArrayList<>();
         List<String> basePackages=new ArrayList<>();
-        MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
-        if(map!=null){
-            List<Object> list=map.get("locations");
-            if(list!=null){
-                for(Object locationsObj:list){
-                    String[] locations=(String[])locationsObj;
-                    for(Object location:locations){
-                        listResource.add(location);
-                    }
-                }
-            }
 
-            List<Object> basePackageList=map.get("basePackage");
-            if(basePackageList!=null) {
-                for (Object basePackageObject : basePackageList) {
-                    String[] basePackageString = (String[]) basePackageObject;
-                    for (String base : basePackageString) {
-                        basePackages.add(base);
-                    }
-                }
-            }
-        }
+        MergedAnnotation mergedAnnotation=importingClassMetadata.getAnnotations().get(EnableInterfaceCall.class);
+        String[] locations=(String[])mergedAnnotation.getValue("locations").orElseGet(()->new String[]{});
+        String[] basePackage=(String[])mergedAnnotation.getValue("basePackage").orElseGet(()->new String[]{});
+        Class<? extends APIRestTemplate> restTemplateClass=(Class<? extends APIRestTemplate>)mergedAnnotation.getValue("restTemplateClass").orElseGet(()->APIRestTemplate.class);
 
+        listResource.addAll(Arrays.asList(locations));
         if(basePackage!=null){
             basePackages.addAll(Arrays.asList(basePackage));
         }
@@ -85,8 +68,10 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.registerBean(PostHandler.class,registry);
         this.registerBean(GetHandler.class,registry);
         this.registerBean(CacheHandler.class,registry);
+        this.registerBean(restTemplateClass,registry);
 
-        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory);
+
+        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory,restTemplateClass);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
         scanner.addIncludeFilter(annotationTypeFilter);
         basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));

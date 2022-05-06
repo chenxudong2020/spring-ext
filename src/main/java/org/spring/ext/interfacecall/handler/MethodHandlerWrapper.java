@@ -1,5 +1,6 @@
 package org.spring.ext.interfacecall.handler;
 
+import org.spring.ext.interfacecall.APIRestTemplate;
 import org.spring.ext.interfacecall.CallProperties;
 import org.spring.ext.interfacecall.annotation.Cache;
 import org.spring.ext.interfacecall.entity.CacheMeta;
@@ -26,14 +27,16 @@ public class MethodHandlerWrapper implements MethodHandler {
     private BeanFactory beanFactory;
     private CallProperties callProperties;
     private String className;
+    private Class<? extends APIRestTemplate> restTemplateClass;
 
-    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, BeanFactory beanFactory, CallProperties callProperties, String className) {
+    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, BeanFactory beanFactory, CallProperties callProperties, String className,Class<? extends APIRestTemplate> restTemplateClass) {
         this.methodHandler = methodHandler;
         this.methodMeta = method;
         this.args = args;
         this.beanFactory = beanFactory;
         this.callProperties = callProperties;
         this.className = className;
+        this.restTemplateClass=restTemplateClass;
     }
 
 
@@ -80,12 +83,12 @@ public class MethodHandlerWrapper implements MethodHandler {
         if (args == null) {
             args = new Object[]{};
         }
-        return this.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type);
+        return this.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type,restTemplateClass);
     }
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type) throws Throwable {
-        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type);
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type,Class<? extends APIRestTemplate> restTemplateClass) throws Throwable {
+        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type,restTemplateClass);
     }
 }

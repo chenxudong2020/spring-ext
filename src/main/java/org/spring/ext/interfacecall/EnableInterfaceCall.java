@@ -1,6 +1,7 @@
 package org.spring.ext.interfacecall;
 
 
+import org.spring.ext.validate.result.ResultConvertor;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -15,5 +16,9 @@ import java.lang.annotation.*;
 public @interface EnableInterfaceCall {
     String[] basePackage() default {};
 
+    String[] locations() default {};
+
+
+    Class<? extends APIRestTemplate> restTemplateClass() default APIRestTemplate.class;
 
 }

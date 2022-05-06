@@ -24,12 +24,14 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>,EnvironmentAw
     private BeanFactory beanFactory;
     private Environment environment;
     private List<Object> listResource;
+    private Class<? extends APIRestTemplate> restTemplateClass;
 
 
-    public CallInterfaceFactoryBean(Class<T> callInterface,List<Object> listResource,BeanFactory beanFactory) {
+    public CallInterfaceFactoryBean(Class<T> callInterface,List<Object> listResource,BeanFactory beanFactory, Class<? extends APIRestTemplate> restTemplateClass) {
         this.listResource=listResource;
         this.callInterface = callInterface;
         this.beanFactory=beanFactory;
+        this.restTemplateClass=restTemplateClass;
 
     }
 
@@ -37,7 +39,7 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>,EnvironmentAw
     public T getObject(){
         return (T) Proxy.newProxyInstance(callInterface.getClassLoader(),
                 new Class<?>[]{callInterface},
-                new CallInterfaceHandler(beanFactory,callInterface.getName())
+                new CallInterfaceHandler(beanFactory,callInterface.getName(),restTemplateClass)
 
         );
 

@@ -13,13 +13,13 @@ import java.lang.reflect.Method;
 public class CallInterfaceHandler implements InvocationHandler {
     private BeanFactory beanFactory;
     private final String className;
+    private Class<? extends APIRestTemplate> restTemplateClass;
 
 
-
-    public CallInterfaceHandler(BeanFactory beanFactory, String className) {
+    public CallInterfaceHandler(BeanFactory beanFactory, String className,Class<? extends APIRestTemplate> restTemplateClass) {
         this.beanFactory = beanFactory;
         this.className = className;
-
+        this.restTemplateClass=restTemplateClass;
 
     }
 
@@ -33,7 +33,7 @@ public class CallInterfaceHandler implements InvocationHandler {
         MethodMeta methodMeta = callProperties.methodMetaMap.get(key);
         methodMeta.method = method;
         MethodHandler methodHandler = methodMeta.methodHandler;
-        MethodHandlerWrapper methodHandlerWrapper = new MethodHandlerWrapper(methodHandler, methodMeta, args, beanFactory, callProperties, className);
+        MethodHandlerWrapper methodHandlerWrapper = new MethodHandlerWrapper(methodHandler, methodMeta, args, beanFactory, callProperties, className,restTemplateClass);
         return methodHandlerWrapper.invoke(proxy,method,args);
 
     }
