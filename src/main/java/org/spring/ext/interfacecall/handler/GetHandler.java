@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class GetHandler implements MethodHandler  {
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type,Class<? extends APIRestTemplate> restTemplateClass) throws Throwable {
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type, Class<? extends APIRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack, Method method) throws Throwable {
         Map map=new HashMap();
         for(ParameterMeta parameterMeta:parameterMetas){
             if(null!=parameterMeta.head){

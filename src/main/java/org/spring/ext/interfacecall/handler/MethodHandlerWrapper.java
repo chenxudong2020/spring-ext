@@ -28,8 +28,10 @@ public class MethodHandlerWrapper implements MethodHandler {
     private CallProperties callProperties;
     private String className;
     private Class<? extends APIRestTemplate> restTemplateClass;
+    private Class callBackClass;
+    private boolean isCallBack;
 
-    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, BeanFactory beanFactory, CallProperties callProperties, String className,Class<? extends APIRestTemplate> restTemplateClass) {
+    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, BeanFactory beanFactory, CallProperties callProperties, String className,Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack) {
         this.methodHandler = methodHandler;
         this.methodMeta = method;
         this.args = args;
@@ -37,6 +39,8 @@ public class MethodHandlerWrapper implements MethodHandler {
         this.callProperties = callProperties;
         this.className = className;
         this.restTemplateClass=restTemplateClass;
+        this.callBackClass=callBackClass;
+        this.isCallBack=isCallBack;
     }
 
 
@@ -83,12 +87,12 @@ public class MethodHandlerWrapper implements MethodHandler {
         if (args == null) {
             args = new Object[]{};
         }
-        return this.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type,restTemplateClass);
+        return this.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type,restTemplateClass,callBackClass,isCallBack,methodMeta.method);
     }
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type,Class<? extends APIRestTemplate> restTemplateClass) throws Throwable {
-        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type,restTemplateClass);
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type,Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack,Method method) throws Throwable {
+        return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type,restTemplateClass,callBackClass,isCallBack,method);
     }
 }

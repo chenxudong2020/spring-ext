@@ -25,13 +25,17 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>,EnvironmentAw
     private Environment environment;
     private List<Object> listResource;
     private Class<? extends APIRestTemplate> restTemplateClass;
+    private Class callBackClass;
+    private boolean isCallBack;
 
 
-    public CallInterfaceFactoryBean(Class<T> callInterface,List<Object> listResource,BeanFactory beanFactory, Class<? extends APIRestTemplate> restTemplateClass) {
+    public CallInterfaceFactoryBean(Class<T> callInterface,List<Object> listResource,BeanFactory beanFactory, Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack) {
         this.listResource=listResource;
         this.callInterface = callInterface;
         this.beanFactory=beanFactory;
         this.restTemplateClass=restTemplateClass;
+        this.callBackClass=callBackClass;
+        this.isCallBack=isCallBack;
 
     }
 
@@ -39,7 +43,7 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>,EnvironmentAw
     public T getObject(){
         return (T) Proxy.newProxyInstance(callInterface.getClassLoader(),
                 new Class<?>[]{callInterface},
-                new CallInterfaceHandler(beanFactory,callInterface.getName(),restTemplateClass)
+                new CallInterfaceHandler(beanFactory,callInterface.getName(),restTemplateClass,callBackClass,isCallBack)
 
         );
 

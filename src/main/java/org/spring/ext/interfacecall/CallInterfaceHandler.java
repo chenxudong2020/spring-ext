@@ -14,12 +14,16 @@ public class CallInterfaceHandler implements InvocationHandler {
     private BeanFactory beanFactory;
     private final String className;
     private Class<? extends APIRestTemplate> restTemplateClass;
+    private Class callBackClass;
+    private boolean isCallBack;
 
 
-    public CallInterfaceHandler(BeanFactory beanFactory, String className,Class<? extends APIRestTemplate> restTemplateClass) {
+    public CallInterfaceHandler(BeanFactory beanFactory, String className,Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack) {
         this.beanFactory = beanFactory;
         this.className = className;
         this.restTemplateClass=restTemplateClass;
+        this.callBackClass=callBackClass;
+        this.isCallBack=isCallBack;
 
     }
 
@@ -33,7 +37,7 @@ public class CallInterfaceHandler implements InvocationHandler {
         MethodMeta methodMeta = callProperties.methodMetaMap.get(key);
         methodMeta.method = method;
         MethodHandler methodHandler = methodMeta.methodHandler;
-        MethodHandlerWrapper methodHandlerWrapper = new MethodHandlerWrapper(methodHandler, methodMeta, args, beanFactory, callProperties, className,restTemplateClass);
+        MethodHandlerWrapper methodHandlerWrapper = new MethodHandlerWrapper(methodHandler, methodMeta, args, beanFactory, callProperties, className,restTemplateClass,callBackClass,isCallBack);
         return methodHandlerWrapper.invoke(proxy,method,args);
 
     }

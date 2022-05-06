@@ -13,15 +13,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.client.ResourceAccessException;
 
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class PostHandler implements MethodHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PostHandler.class);
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type,Class<? extends APIRestTemplate> restTemplateClass) throws Throwable {
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type, Class<? extends APIRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack, Method method) throws Throwable {
         int bodyCount = 0;
         List<Object> listObjs = new ArrayList<>(Arrays.asList(args));
         for (ParameterMeta parameterMeta : parameterMetas) {
@@ -69,6 +72,21 @@ public class PostHandler implements MethodHandler {
         }
         HttpEntity formEntity = new HttpEntity<>(args.length == 0 ? null : args.length == 1 ? args[0] : args, headers);
         APIRestTemplate restTemplate =beanFactory.getBean(restTemplateClass);
-        return restTemplate.postForObject(url, formEntity, Class.forName(returnName));
+        try {
+            return restTemplate.postForObject(url, formEntity, Class.forName(returnName));
+        }catch (ResourceAccessException e){
+            if(isCallBack){
+                Object obj= beanFactory.getBean(callBackClass);
+                Method methodCall=ReflectionUtils.findMethod(callBackClass,method.getName());
+                if(null!=methodCall){
+                    return methodCall.invoke(obj,method.getParameters());
+                }else{
+                    throw new RuntimeException("CallBack配置类中未找到同名方法！");
+                }
+            }
+            throw new RuntimeException(e);
+
+        }
+
     }
 }

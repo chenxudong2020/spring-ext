@@ -12,6 +12,7 @@ import org.spring.ext.interfacecall.annotation.*;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
@@ -35,13 +36,14 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
     private List<Object> listResource;
     private BeanFactory beanFactory;
     private Class<? extends APIRestTemplate> restTemplateClass;
+    private BeanDefinitionRegistry registry;
     public ImportCallBeanDefinitionScanner(BeanDefinitionRegistry registry, ClassLoader classLoader,List<Object> listResource, BeanFactory beanFactory,Class<? extends APIRestTemplate> restTemplateClass) {
         super(registry, false);
         this.classLoader = classLoader;
         this.listResource=listResource;
         this.beanFactory=beanFactory;
         this.restTemplateClass=restTemplateClass;
-
+        this.registry=registry;
 
     }
 
@@ -59,6 +61,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         for (BeanDefinitionHolder holder : beanDefinitions) {
             AnnotatedBeanDefinition beanDefinition = (AnnotatedBeanDefinition) holder.getBeanDefinition();
             AnnotationAttributes annAttr = AnnotationAttributes.fromMap(beanDefinition.getMetadata().getAnnotationAttributes(InterfaceClient.class.getName()));
+            Class callBackClass=annAttr.getClass("callBackClass");
             String value = annAttr.getString("value");
             callProperties.parameterMetaMap.putAll(getParameterMeta(beanDefinition, value));
             genericBeanDefinition = (GenericBeanDefinition) holder.getBeanDefinition();
@@ -66,7 +69,23 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(listResource);
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory);
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(restTemplateClass.getName());
+            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(callBackClass.getName());
+            boolean isCallBack=false;
+            try {
+                isCallBack=genericBeanDefinition.resolveBeanClass(classLoader).isAssignableFrom(callBackClass);
+            }catch (ClassNotFoundException e){
+
+            }
+            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(isCallBack);
+            if(isCallBack){
+                GenericBeanDefinition callBackClassGenericBeanDefinition=new GenericBeanDefinition();
+                callBackClassGenericBeanDefinition.setBeanClass(callBackClass);
+                callBackClassGenericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+                registry.registerBeanDefinition(callBackClass.getName(),callBackClassGenericBeanDefinition);
+            }
+
             genericBeanDefinition.setBeanClass(CallInterfaceFactoryBean.class);
+
 
 
         }
