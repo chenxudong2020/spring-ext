@@ -20,6 +20,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,10 +67,12 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
             }
 
             List<Object> basePackageList=map.get("basePackage");
-            for(Object basePackageObject:basePackageList){
-                String[] basePackageString=(String[])basePackageObject;
-                for(String base:basePackageString){
-                    basePackages.add(base);
+            if(basePackageList!=null) {
+                for (Object basePackageObject : basePackageList) {
+                    String[] basePackageString = (String[]) basePackageObject;
+                    for (String base : basePackageString) {
+                        basePackages.add(base);
+                    }
                 }
             }
         }
@@ -77,26 +80,9 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         if(basePackage!=null){
             basePackages.addAll(Arrays.asList(basePackage));
         }
-
-
-        GenericBeanDefinition genericBeanDefinition =new GenericBeanDefinition();
-        genericBeanDefinition.setBeanClass(CallProperties.class);
-        genericBeanDefinition.setBeanClassName(CallProperties.class.getName());
-        genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        registry.registerBeanDefinition(CallProperties.class.getName(),genericBeanDefinition);
-
-
-
-        GenericBeanDefinition genericBeanDefinitionPost=new GenericBeanDefinition();
-        genericBeanDefinitionPost.setBeanClass(PostHandler.class);
-        genericBeanDefinitionPost.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        registry.registerBeanDefinition(PostHandler.class.getName(),genericBeanDefinitionPost);
-
-        GenericBeanDefinition genericBeanDefinitionGet=new GenericBeanDefinition();
-        genericBeanDefinitionGet.setBeanClass(GetHandler.class);
-        genericBeanDefinitionGet.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        registry.registerBeanDefinition(GetHandler.class.getName(),genericBeanDefinitionGet);
-
+        this.registerBean(CallProperties.class,registry);
+        this.registerBean(PostHandler.class,registry);
+        this.registerBean(GetHandler.class,registry);
 
         ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
@@ -107,6 +93,13 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
     }
 
+
+    private void registerBean(Class classz,BeanDefinitionRegistry registry){
+        GenericBeanDefinition genericBeanDefinition=new GenericBeanDefinition();
+        genericBeanDefinition.setBeanClass(classz);
+        genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        registry.registerBeanDefinition(classz.getName(),genericBeanDefinition);
+    }
 
 
 
