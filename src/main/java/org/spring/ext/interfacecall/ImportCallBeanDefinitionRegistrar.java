@@ -54,13 +54,37 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         List<Object> listResource=new ArrayList<>();
         List<String> basePackages=new ArrayList<>();
+        Class<? extends APIRestTemplate> restTemplateClass=APIRestTemplate.class;
+        MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
+        if(map!=null){
+            List<Object> list=map.get("locations");
+            if(list!=null){
+                for(Object locationsObj:list){
+                    String[] locations=(String[])locationsObj;
+                    for(Object location:locations){
+                        listResource.add(location);
+                    }
+                }
+            }
 
-        MergedAnnotation mergedAnnotation=importingClassMetadata.getAnnotations().get(EnableInterfaceCall.class);
-        String[] locations=(String[])mergedAnnotation.getValue("locations").orElseGet(()->new String[]{});
-        String[] basePackage=(String[])mergedAnnotation.getValue("basePackage").orElseGet(()->new String[]{});
-        Class<? extends APIRestTemplate> restTemplateClass=(Class<? extends APIRestTemplate>)mergedAnnotation.getValue("restTemplateClass").orElseGet(()->APIRestTemplate.class);
+            List<Object> basePackageList=map.get("basePackage");
+            if(basePackageList!=null) {
+                for (Object basePackageObject : basePackageList) {
+                    String[] basePackageString = (String[]) basePackageObject;
+                    for (String base : basePackageString) {
+                        basePackages.add(base);
+                    }
+                }
+            }
 
-        listResource.addAll(Arrays.asList(locations));
+            List<Object> restTemplateClassList=map.get("restTemplateClass");
+            if(basePackageList!=null) {
+                for (Object restTemplateClassObj : restTemplateClassList) {
+                    restTemplateClass=(Class<? extends APIRestTemplate>)restTemplateClassObj;
+                    break;
+                }
+            }
+        }
         if(basePackage!=null){
             basePackages.addAll(Arrays.asList(basePackage));
         }

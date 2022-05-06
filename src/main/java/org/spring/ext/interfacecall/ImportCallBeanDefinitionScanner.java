@@ -21,6 +21,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
@@ -64,7 +65,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(Objects.requireNonNull(genericBeanDefinition.getBeanClassName()));
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(listResource);
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory);
-            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(restTemplateClass);
+            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(restTemplateClass.getName());
             genericBeanDefinition.setBeanClass(CallInterfaceFactoryBean.class);
 
 
@@ -73,83 +74,91 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         return beanDefinitions;
     }
 
-    private MethodMeta initMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
-        List<ParameterMeta> list=new ArrayList<>();
-        Parameter[] parameters = method.getParameters();
-        ParamHandler paramHandler  = new ParamHandler();
-        int parameterCount = 0;
-        for (Parameter parameter : parameters) {
-            paramHandler.handler(beanDefinition, InterfaceClientValue, method, parameter, parameterCount);
-            list.add(paramHandler.getHandlerRequest().getParameterMeta());
-            parameterCount += 1;
-        }
-        if (paramHandler == null) {
-            paramHandler.handler(beanDefinition, InterfaceClientValue, method, null, parameterCount);
-        }
-        String key = paramHandler.getHandlerRequest().getKey();
-        map.put(key, list);
-        MethodMeta methodMeta = new MethodMeta();
-        methodMeta.methodName = key;
-        methodMeta.post = AnnotatedElementUtils.findMergedAnnotation(method, POST.class);
-        methodMeta.get = AnnotatedElementUtils.findMergedAnnotation(method, GET.class);
-        methodMeta.cache = AnnotatedElementUtils.findMergedAnnotation(method, Cache.class);
-        methodMeta.type = AnnotatedElementUtils.findMergedAnnotation(method, Type.class);
-        callProperties.methodMetaMap.put(key, methodMeta);
-        String returnName = method.getReturnType().getName();
-        callProperties.returnMap.put(methodMeta.methodName, returnName);
-        return methodMeta;
-
-    }
-
-
-    private void initPostMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
-        MethodMeta methodMeta = initMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
-        methodMeta.methodHandler=beanFactory.getBean(PostHandler.class);
-        String interfaceUrlSuffix = methodMeta.post.value();
-        String interfaceUrl = interfaceUrlSuffix;
-        if (!StringUtils.isEmpty(InterfaceClientValue)) {
-            interfaceUrl = String.format(Constant.urlFormat, InterfaceClientValue, interfaceUrlSuffix);
-        }
-
-        callProperties.interfaceUrlMap.put(methodMeta.methodName, interfaceUrl);
-    }
-
-
-    private void initGetMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
-        MethodMeta methodMeta = initMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
-        methodMeta.methodHandler=beanFactory.getBean(GetHandler.class);
-        String interfaceUrlSuffix = methodMeta.get.value();
-        String interfaceUrl = interfaceUrlSuffix;
-        if (!StringUtils.isEmpty(InterfaceClientValue)) {
-            interfaceUrl = String.format(Constant.urlFormat, InterfaceClientValue, interfaceUrlSuffix);
-        }
-        callProperties.interfaceUrlMap.put(methodMeta.methodName, interfaceUrl);
-
-
-    }
-
     private Map<String, List<ParameterMeta>> getParameterMeta(AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue) {
         CallProperties callProperties =  beanFactory.getBean(CallProperties.class);
         Class beanClass =null;
         try {
-             beanClass = ClassUtils.forName(beanDefinition.getBeanClassName(), classLoader);
+            beanClass = ClassUtils.forName(beanDefinition.getBeanClassName(), classLoader);
         }catch (ClassNotFoundException e){
             throw new RuntimeException(e);
         }
 
         Map<String, List<ParameterMeta>> map = new ConcurrentHashMap<>();
-        MethodIntrospector.selectMethods(beanClass, (MethodIntrospector.MetadataLookup<Object>) method -> {
-            if (AnnotatedElementUtils.hasAnnotation(method, POST.class) && AnnotatedElementUtils.hasAnnotation(method, GET.class)) {
-                throw new RuntimeException(method.getName() + "POST和GET不能注解同一个方法!");
-            } else if (AnnotatedElementUtils.hasAnnotation(method, POST.class) && !AnnotatedElementUtils.hasAnnotation(method, GET.class)) {
-                this.initPostMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
-
-            } else if (!AnnotatedElementUtils.hasAnnotation(method, POST.class) && AnnotatedElementUtils.hasAnnotation(method, GET.class)) {
-                this.initGetMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
+        ReflectionUtils.doWithMethods(beanClass, new ReflectionUtils.MethodCallback() {
+            private boolean hasAnnotation(Method method,Class classz){
+                return method.getAnnotation(classz)!=null;
             }
-            return null;
 
+            private MethodMeta initMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
+                List<ParameterMeta> list=new ArrayList<>();
+                Parameter[] parameters = method.getParameters();
+                ParamHandler paramHandler  = new ParamHandler();
+                int parameterCount = 0;
+                for (Parameter parameter : parameters) {
+                    paramHandler.handler(beanDefinition, InterfaceClientValue, method, parameter, parameterCount);
+                    list.add(paramHandler.getHandlerRequest().getParameterMeta());
+                    parameterCount += 1;
+                }
+                if (paramHandler.getHandlerRequest()==null) {
+                    paramHandler.handler(beanDefinition, InterfaceClientValue, method, null, parameterCount);
+                }
+                String key = paramHandler.getHandlerRequest().getKey();
+                map.put(key, list);
+                MethodMeta methodMeta = new MethodMeta();
+                methodMeta.methodName = key;
+                methodMeta.post =method.getAnnotation(POST.class);
+                methodMeta.get = method.getAnnotation(GET.class);
+                methodMeta.cache = method.getAnnotation(Cache.class);
+                methodMeta.type = method.getAnnotation(Type.class);
+                callProperties.methodMetaMap.put(key, methodMeta);
+                String returnName = method.getReturnType().getName();
+                callProperties.returnMap.put(methodMeta.methodName, returnName);
+                return methodMeta;
+
+            }
+
+
+            private void initPostMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
+                MethodMeta methodMeta = initMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
+                methodMeta.methodHandler=beanFactory.getBean(PostHandler.class);
+                String interfaceUrlSuffix = methodMeta.post.value();
+                String interfaceUrl = interfaceUrlSuffix;
+                if (!StringUtils.isEmpty(InterfaceClientValue)) {
+                    interfaceUrl = String.format(Constant.urlFormat, InterfaceClientValue, interfaceUrlSuffix);
+                }
+
+                callProperties.interfaceUrlMap.put(methodMeta.methodName, interfaceUrl);
+            }
+
+
+            private void initGetMethod(Method method, AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Map<String, List<ParameterMeta>> map, CallProperties callProperties) {
+                MethodMeta methodMeta = initMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
+                methodMeta.methodHandler=beanFactory.getBean(GetHandler.class);
+                String interfaceUrlSuffix = methodMeta.get.value();
+                String interfaceUrl = interfaceUrlSuffix;
+                if (!StringUtils.isEmpty(InterfaceClientValue)) {
+                    interfaceUrl = String.format(Constant.urlFormat, InterfaceClientValue, interfaceUrlSuffix);
+                }
+                callProperties.interfaceUrlMap.put(methodMeta.methodName, interfaceUrl);
+
+
+            }
+
+
+            @Override
+            public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+                if (this.hasAnnotation(method,POST.class) && this.hasAnnotation(method,GET.class)) {
+                    throw new RuntimeException(method.getName() + "POST和GET不能注解同一个方法!");
+                } else if (this.hasAnnotation(method,POST.class) && !this.hasAnnotation(method,GET.class)) {
+                    this.initPostMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
+
+                } else if (!this.hasAnnotation(method,POST.class) && this.hasAnnotation(method,GET.class)) {
+                    this.initGetMethod(method, beanDefinition, InterfaceClientValue, map, callProperties);
+                }
+            }
         });
+
+
         return map;
 
     }
