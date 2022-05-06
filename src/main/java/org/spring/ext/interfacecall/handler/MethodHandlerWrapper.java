@@ -48,13 +48,14 @@ public class MethodHandlerWrapper implements MethodHandler {
             for (Object obj : args) {
                 key += obj.toString();
             }
-            CacheMeta cacheMeta = CacheHandler.getInstance().cacheList.get(key);
+            CacheHandler cacheHandler=beanFactory.getBean(CacheHandler.class);
+            CacheMeta cacheMeta = cacheHandler.cacheList.get(key);
             if (cacheMeta == null || (cacheMeta != null && (new Date().getTime() - cacheMeta.currentTime >= cache.expire()))) {
                 cacheMeta = new CacheMeta();
                 cacheMeta.cache = cache;
                 cacheMeta.object = invoke(proxy);
                 cacheMeta.currentTime = new Date().getTime();
-                CacheHandler.getInstance().cacheList.put(key, cacheMeta);
+                cacheHandler.cacheList.put(key, cacheMeta);
             }
             return cacheMeta.object;
         }

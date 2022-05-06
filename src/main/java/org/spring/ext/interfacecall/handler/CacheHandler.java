@@ -7,16 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CacheHandler {
 
-    private CacheHandler() {
-    }
-
-    private static final CacheHandler cacheHandler = new CacheHandler();
-
-    public static CacheHandler getInstance() {
-        return cacheHandler;
-    }
-
-    public Map<String, CacheMeta> cacheList = new ConcurrentHashMap<>(500);
+    public Map<String, CacheMeta> cacheList = new ConcurrentHashMap<>(5000);
 
 
 }

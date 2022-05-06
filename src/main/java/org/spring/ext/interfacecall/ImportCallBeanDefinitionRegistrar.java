@@ -3,6 +3,7 @@ package org.spring.ext.interfacecall;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.ext.interfacecall.annotation.InterfaceClient;
+import org.spring.ext.interfacecall.handler.CacheHandler;
 import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
 import org.springframework.beans.BeansException;
@@ -83,6 +84,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.registerBean(CallProperties.class,registry);
         this.registerBean(PostHandler.class,registry);
         this.registerBean(GetHandler.class,registry);
+        this.registerBean(CacheHandler.class,registry);
 
         ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
