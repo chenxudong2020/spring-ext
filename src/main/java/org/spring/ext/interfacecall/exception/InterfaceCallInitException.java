@@ -7,7 +7,7 @@ public class InterfaceCallInitException extends RuntimeException{
     public InterfaceCallInitException(String s) {
         super(s);
     }
-    public InterfaceCallInitException(RuntimeException e) {
+    public InterfaceCallInitException(Exception e) {
         super(e);
     }
 }

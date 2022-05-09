@@ -4,6 +4,7 @@ package org.spring.ext.interfacecall;
 
 import org.spring.ext.interfacecall.entity.ParameterMeta;
 import org.spring.ext.interfacecall.annotation.*;
+import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -88,7 +89,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
         try {
             beanClass = ClassUtils.forName(beanDefinition.getBeanClassName(), classLoader);
         }catch (ClassNotFoundException e){
-            throw new RuntimeException(e);
+            throw new InterfaceCallInitException(e);
         }
 
         Map<String, List<ParameterMeta>> map = new ConcurrentHashMap<>(16);
