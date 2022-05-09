@@ -1,18 +1,16 @@
 package org.spring.ext.interfacecall.handler;
 
-import org.spring.ext.interfacecall.APIRestTemplate;
+import org.spring.ext.interfacecall.ApiRestTemplate;
 import org.spring.ext.interfacecall.CallProperties;
 import org.spring.ext.interfacecall.annotation.Cache;
 import org.spring.ext.interfacecall.entity.CacheMeta;
 import org.spring.ext.interfacecall.entity.MethodMeta;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.lang.reflect.Method;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +25,11 @@ public class MethodHandlerWrapper implements MethodHandler {
     private BeanFactory beanFactory;
     private CallProperties callProperties;
     private String className;
-    private Class<? extends APIRestTemplate> restTemplateClass;
+    private Class<? extends ApiRestTemplate> restTemplateClass;
     private Class callBackClass;
     private boolean isCallBack;
 
-    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, BeanFactory beanFactory, CallProperties callProperties, String className,Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack) {
+    public MethodHandlerWrapper(MethodHandler methodHandler, MethodMeta method, Object[] args, BeanFactory beanFactory, CallProperties callProperties, String className, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack) {
         this.methodHandler = methodHandler;
         this.methodMeta = method;
         this.args = args;
@@ -57,11 +55,13 @@ public class MethodHandlerWrapper implements MethodHandler {
             }
             CacheHandler cacheHandler=beanFactory.getBean(CacheHandler.class);
             CacheMeta cacheMeta = cacheHandler.cacheList.get(key);
-            if (cacheMeta == null || (cacheMeta != null && (new Date().getTime() - cacheMeta.currentTime >= cache.expire()))) {
+            Long currentTime=System.currentTimeMillis();
+            boolean isExpire=cacheMeta != null && (currentTime - cacheMeta.currentTime >= cache.expire());
+            if (cacheMeta == null || isExpire) {
                 cacheMeta = new CacheMeta();
                 cacheMeta.cache = cache;
                 cacheMeta.object = invoke(proxy);
-                cacheMeta.currentTime = new Date().getTime();
+                cacheMeta.currentTime = currentTime;
                 cacheHandler.cacheList.put(key, cacheMeta);
             }
             return cacheMeta.object;
@@ -82,7 +82,7 @@ public class MethodHandlerWrapper implements MethodHandler {
         MediaType type = MediaType.parseMediaType(methodMeta.type == null ? MediaType.APPLICATION_JSON_VALUE : methodMeta.type.value());
         headers.setContentType(type);
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
-        Map map = new HashMap();
+        Map map = new HashMap(16);
         String url = interfaceUrl;
         if (args == null) {
             args = new Object[]{};
@@ -92,7 +92,7 @@ public class MethodHandlerWrapper implements MethodHandler {
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type,Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack,Method method) throws Throwable {
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack, Method method) throws Throwable {
         return methodHandler.doHandler(parameterMetas, headers, args, url, returnName, beanFactory, type,restTemplateClass,callBackClass,isCallBack,method);
     }
 }

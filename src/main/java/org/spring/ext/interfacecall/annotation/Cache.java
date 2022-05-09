@@ -7,6 +7,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface Cache {
     //过期时间
-    long expire() default 7200l;
+    long expire() default 7200L;
 
 }

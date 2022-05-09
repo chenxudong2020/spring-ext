@@ -13,34 +13,34 @@ public class ParamHandler {
 
 
 
-    public void handler(AnnotatedBeanDefinition beanDefinition, String InterfaceClientValue, Method method, Parameter parameter,int parameterCount){
+    public void handler(AnnotatedBeanDefinition beanDefinition, String interfaceClientValue, Method method, Parameter parameter,int parameterCount){
         if(parameter!=null){
-            BodyHandler bodyHandler=new BodyHandler();
-            HeadHandler headHandler=new HeadHandler();
-            UrlHandler urlHandler=new UrlHandler();
-            QueryHandler queryHandler=new QueryHandler();
+            BodyAbstractHandler bodyHandler=new BodyAbstractHandler();
+            HeadAbstractHandler headHandler=new HeadAbstractHandler();
+            UrlAbstractHandler urlHandler=new UrlAbstractHandler();
+            QueryAbstractHandler queryHandler=new QueryAbstractHandler();
             bodyHandler.setNext(headHandler);
             headHandler.setNext(urlHandler);
             urlHandler.setNext(queryHandler);
             HandlerRequest handlerRequest=new HandlerRequest();
             handlerRequest.setBeanDefinition(beanDefinition);
-            String key = String.format(Constant.keyFormat, beanDefinition.getBeanClassName(), method.getName());
+            String key = String.format(Constant.KEY_FORMAT, beanDefinition.getBeanClassName(), method.getName());
             handlerRequest.setKey(key);
-            handlerRequest.setInterfaceClientValue(InterfaceClientValue);
+            handlerRequest.setInterfaceClientValue(interfaceClientValue);
             handlerRequest.setParameter(parameter);
             handlerRequest.setParameterCount(parameterCount);
             handlerRequest.init();
-            HandlerChain handlerChain=bodyHandler.handler(handlerRequest);
-            while(handlerChain!=null){
-                handlerChain=handlerChain.handler(handlerRequest);
+            AbstractHandlerChain abstractHandlerChain =bodyHandler.handler(handlerRequest);
+            while(abstractHandlerChain !=null){
+                abstractHandlerChain = abstractHandlerChain.handler(handlerRequest);
             }
             this.handlerRequest=handlerRequest;
         }else{
             HandlerRequest handlerRequest=new HandlerRequest();
             handlerRequest.setBeanDefinition(beanDefinition);
-            String key = String.format(Constant.keyFormat, beanDefinition.getBeanClassName(), method.getName());
+            String key = String.format(Constant.KEY_FORMAT, beanDefinition.getBeanClassName(), method.getName());
             handlerRequest.setKey(key);
-            handlerRequest.setInterfaceClientValue(InterfaceClientValue);
+            handlerRequest.setInterfaceClientValue(interfaceClientValue);
             handlerRequest.setParameterCount(parameterCount);
             handlerRequest.init();
             this.handlerRequest=handlerRequest;

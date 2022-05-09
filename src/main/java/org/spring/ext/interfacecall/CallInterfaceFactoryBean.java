@@ -1,10 +1,7 @@
 package org.spring.ext.interfacecall;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.*;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -24,12 +21,12 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>,EnvironmentAw
     private BeanFactory beanFactory;
     private Environment environment;
     private List<Object> listResource;
-    private Class<? extends APIRestTemplate> restTemplateClass;
+    private Class<? extends ApiRestTemplate> restTemplateClass;
     private Class callBackClass;
     private boolean isCallBack;
 
 
-    public CallInterfaceFactoryBean(Class<T> callInterface,List<Object> listResource,BeanFactory beanFactory, Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack) {
+    public CallInterfaceFactoryBean(Class<T> callInterface, List<Object> listResource, BeanFactory beanFactory, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack) {
         this.listResource=listResource;
         this.callInterface = callInterface;
         this.beanFactory=beanFactory;
@@ -96,7 +93,7 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>,EnvironmentAw
         CallProperties callProperties = beanFactory.getBean(CallProperties.class);
         if(callProperties.isCached){return;}
         this.addResourceEnvironment(listResource,environment);
-        Map<String, String> urlMap = new ConcurrentHashMap<>();
+        Map<String, String> urlMap = new ConcurrentHashMap<>(16);
         callProperties.interfaceUrlMap.forEach((x, y) -> {
             y = environment.resolvePlaceholders(y);
             urlMap.put(x, y);

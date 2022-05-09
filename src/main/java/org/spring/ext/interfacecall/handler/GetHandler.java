@@ -2,15 +2,13 @@ package org.spring.ext.interfacecall.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spring.ext.interfacecall.APIRestTemplate;
+import org.spring.ext.interfacecall.ApiRestTemplate;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -22,8 +20,8 @@ public class GetHandler implements MethodHandler  {
 
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type, Class<? extends APIRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack, Method method) throws Throwable {
-        Map map=new HashMap();
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack, Method method) throws Throwable {
+        Map map=new HashMap(16);
         for(ParameterMeta parameterMeta:parameterMetas){
             if(null!=parameterMeta.head){
                 headers.add(parameterMeta.head.value(), args[parameterMeta.parameterCount].toString());
@@ -44,7 +42,7 @@ public class GetHandler implements MethodHandler  {
         }
         LOG.info(String.format("-->get:%s",url));
         HttpEntity formEntity = new HttpEntity<>(headers);
-        APIRestTemplate restTemplate =beanFactory.getBean(restTemplateClass);
+        ApiRestTemplate restTemplate =beanFactory.getBean(restTemplateClass);
         return restTemplate.exchange(url, HttpMethod.GET,formEntity,Class.forName(returnName),map).getBody();
     }
 }

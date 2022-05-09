@@ -13,7 +13,7 @@ public class HandlerRequest {
     private Parameter parameter;
     private ParameterMeta parameterMeta=new ParameterMeta();
     private AnnotatedBeanDefinition beanDefinition;
-    private  String InterfaceClientValue;
+    private  String interfaceClientValue;
     private List<ParameterMeta> list=new ArrayList<>();
     private String key;
     private int parameterCount;
@@ -61,11 +61,11 @@ public class HandlerRequest {
     }
 
     public String getInterfaceClientValue() {
-        return InterfaceClientValue;
+        return interfaceClientValue;
     }
 
     public void setInterfaceClientValue(String interfaceClientValue) {
-        InterfaceClientValue = interfaceClientValue;
+        this.interfaceClientValue = interfaceClientValue;
     }
 
     public List<ParameterMeta> getList() {

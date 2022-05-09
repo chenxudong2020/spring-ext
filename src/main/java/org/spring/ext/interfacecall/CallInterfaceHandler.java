@@ -1,11 +1,12 @@
 package org.spring.ext.interfacecall;
 
 
+import org.spring.ext.interfacecall.entity.Constant;
 import org.spring.ext.interfacecall.entity.MethodMeta;
 import org.spring.ext.interfacecall.handler.MethodHandler;
 import org.spring.ext.interfacecall.handler.MethodHandlerWrapper;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.ApplicationContext;
+
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -13,12 +14,12 @@ import java.lang.reflect.Method;
 public class CallInterfaceHandler implements InvocationHandler {
     private BeanFactory beanFactory;
     private final String className;
-    private Class<? extends APIRestTemplate> restTemplateClass;
+    private Class<? extends ApiRestTemplate> restTemplateClass;
     private Class callBackClass;
     private boolean isCallBack;
 
 
-    public CallInterfaceHandler(BeanFactory beanFactory, String className,Class<? extends APIRestTemplate> restTemplateClass,Class callBackClass,boolean isCallBack) {
+    public CallInterfaceHandler(BeanFactory beanFactory, String className, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack) {
         this.beanFactory = beanFactory;
         this.className = className;
         this.restTemplateClass=restTemplateClass;
@@ -33,7 +34,7 @@ public class CallInterfaceHandler implements InvocationHandler {
             return method.invoke(this, args);
         }
         CallProperties callProperties=beanFactory.getBean(CallProperties.class);
-        String key = String.format("%s-%s", className, method.getName());
+        String key = String.format(Constant.KEY_FORMAT, className, method.getName());
         MethodMeta methodMeta = callProperties.methodMetaMap.get(key);
         methodMeta.method = method;
         MethodHandler methodHandler = methodMeta.methodHandler;

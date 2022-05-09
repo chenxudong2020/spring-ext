@@ -15,7 +15,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -54,7 +53,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         List<Object> listResource=new ArrayList<>();
         List<String> basePackages=new ArrayList<>();
-        Class<? extends APIRestTemplate> restTemplateClass=APIRestTemplate.class;
+        Class<? extends ApiRestTemplate> restTemplateClass= ApiRestTemplate.class;
         MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
         if(map!=null){
             List<Object> list=map.get("locations");
@@ -80,7 +79,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
             List<Object> restTemplateClassList=map.get("restTemplateClass");
             if(basePackageList!=null) {
                 for (Object restTemplateClassObj : restTemplateClassList) {
-                    restTemplateClass=(Class<? extends APIRestTemplate>)restTemplateClassObj;
+                    restTemplateClass=(Class<? extends ApiRestTemplate>)restTemplateClassObj;
                     break;
                 }
             }

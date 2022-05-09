@@ -1,7 +1,5 @@
 package org.spring.ext.interfacecall.annotation;
 
-import org.spring.ext.interfacecall.APIRestTemplate;
-
 import java.lang.annotation.*;
 
 

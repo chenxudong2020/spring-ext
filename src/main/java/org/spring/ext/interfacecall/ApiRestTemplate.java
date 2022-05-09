@@ -6,7 +6,10 @@ import org.springframework.web.client.RestTemplate;
 
 
 
-public class APIRestTemplate extends RestTemplate{
+/**
+ * @author 87260
+ */
+public class ApiRestTemplate extends RestTemplate{
 
 
 

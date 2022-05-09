@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.ext.validate.result.Result;
+import org.spring.ext.validate.result.ResultContain;
 import org.spring.ext.validate.result.ResultConvertor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.cglib.beans.BeanMap;
@@ -88,18 +89,14 @@ public class ValidateHandler implements InvocationHandler {
         } else {
             Object returnClsObj = returnClass.newInstance();
             BeanMap beanMap = BeanMap.create(returnClsObj);
-            if (beanMap.containsKey("message") && returnClass.getDeclaredField("message").getType() == String.class)
-                beanMap.put("message", message);
-            if (beanMap.containsKey("msg") && returnClass.getDeclaredField("msg").getType() == String.class)
-                beanMap.put("msg", message);
-            if (beanMap.containsKey("code") && returnClass.getDeclaredField("code").getType() == String.class)
-                beanMap.put("code", "");
-            if (beanMap.containsKey("code") && returnClass.getDeclaredField("code").getType() == Integer.class)
-                beanMap.put("code", 500);
-            if (beanMap.containsKey("success") && returnClass.getDeclaredField("success").getType() == Boolean.class)
-                beanMap.put("success", false);
-            if (beanMap.containsKey("data"))
-                beanMap.put("data", null);
+            ResultContain.values();
+            String defaultResultMessage="message";
+            String defaultResultMsg="msg";
+            for(ResultContain resultContain:ResultContain.values()){
+                if (beanMap.containsKey(resultContain.getResultType()) && returnClass.getDeclaredField(resultContain.getResultType()).getType() == resultContain.getDefaultType()) {
+                    beanMap.put(resultContain.getResultType(),defaultResultMessage.equals(resultContain.getResultType())||defaultResultMsg.equals(resultContain.getResultType())?message:resultContain.getDefaultValue());
+                }
+            }
             return returnClsObj;
         }
 
@@ -109,13 +106,13 @@ public class ValidateHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getName().equals("toString")) {
+        if ("toString".equals(method.getName())) {
             return AopUtils.getTargetClass(proxy).toString();
         }
-        if (method.getName().equals("equals")) {
+        if ("equals".equals(method.getName())) {
             return method.invoke(AopUtils.getTargetClass(proxy), args);
         }
-        if (method.getName().equals("hashCode")) {
+        if ("hashCode".equals(method.getName())) {
             return AopUtils.getTargetClass(proxy).hashCode();
         }
         return validateParams(args, method);

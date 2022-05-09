@@ -10,17 +10,17 @@ import org.spring.ext.interfacecall.annotation.Url;
 
 import java.lang.reflect.Parameter;
 
-public class UrlHandler extends HandlerChain{
+public class UrlAbstractHandler extends AbstractHandlerChain {
 
-    private HandlerChain handler;
+    private AbstractHandlerChain handler;
 
     @Override
-    public void setNext(HandlerChain handler) {
+    public void setNext(AbstractHandlerChain handler) {
         this.handler = handler;
     }
 
     @Override
-    public HandlerChain handler(HandlerRequest request) {
+    public AbstractHandlerChain handler(HandlerRequest request) {
         ParameterMeta parameterMeta=request.getParameterMeta();
         Parameter parameter=request.getParameter();
         Url url = parameter.getAnnotation(Url.class);

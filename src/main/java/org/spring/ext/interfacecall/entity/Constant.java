@@ -2,6 +2,6 @@ package org.spring.ext.interfacecall.entity;
 
 public interface Constant {
 
-    final String keyFormat="%s-%s";
-    final String urlFormat="%s/%s";
+    final String KEY_FORMAT ="%s-%s";
+    final String URL_FORMAT ="%s/%s";
 }

@@ -4,7 +4,7 @@ package org.spring.ext.interfacecall.handler;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spring.ext.interfacecall.APIRestTemplate;
+import org.spring.ext.interfacecall.ApiRestTemplate;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cglib.beans.BeanMap;
@@ -24,7 +24,7 @@ public class PostHandler implements MethodHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PostHandler.class);
 
     @Override
-    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object args[], String url, String returnName, BeanFactory beanFactory, MediaType type, Class<? extends APIRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack, Method method) throws Throwable {
+    public Object doHandler(List<ParameterMeta> parameterMetas, HttpHeaders headers, Object[] args, String url, String returnName, BeanFactory beanFactory, MediaType type, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack, Method method) throws Throwable {
         int bodyCount = 0;
         List<Object> listObjs = new ArrayList<>(Arrays.asList(args));
         for (ParameterMeta parameterMeta : parameterMetas) {
@@ -71,7 +71,7 @@ public class PostHandler implements MethodHandler {
 
         }
         HttpEntity formEntity = new HttpEntity<>(args.length == 0 ? null : args.length == 1 ? args[0] : args, headers);
-        APIRestTemplate restTemplate =beanFactory.getBean(restTemplateClass);
+        ApiRestTemplate restTemplate =beanFactory.getBean(restTemplateClass);
         try {
             return restTemplate.postForObject(url, formEntity, Class.forName(returnName));
         }catch (ResourceAccessException e){
