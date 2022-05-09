@@ -6,6 +6,7 @@ import org.spring.ext.interfacecall.annotation.Head;
 import org.spring.ext.interfacecall.annotation.Query;
 import org.spring.ext.interfacecall.annotation.Url;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
+import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 
 import java.lang.reflect.Parameter;
 
@@ -44,7 +45,7 @@ public class HeadAbstractHandler extends AbstractHandlerChain {
         boolean isValidate = (head != null && url == null && body == null && query == null);
         if (!isNull && isValidate) {
             if (!isValidate) {
-                throw new RuntimeException("head不能和其他，注解同一个参数:" + parameterName + "!");
+                throw new InterfaceCallInitException("head不能和其他，注解同一个参数:" + parameterName + "!");
             }
 
         }

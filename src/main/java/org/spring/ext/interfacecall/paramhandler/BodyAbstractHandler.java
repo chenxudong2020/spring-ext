@@ -7,6 +7,7 @@ import org.spring.ext.interfacecall.annotation.Body;
 import org.spring.ext.interfacecall.annotation.Head;
 import org.spring.ext.interfacecall.annotation.Query;
 import org.spring.ext.interfacecall.annotation.Url;
+import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 
 import java.lang.reflect.Parameter;
 
@@ -49,7 +50,7 @@ public class BodyAbstractHandler extends AbstractHandlerChain {
         boolean isValidate = (body != null && url == null && head == null && query == null);
         if (!isNull) {
             if (!isValidate) {
-                throw new RuntimeException(key + " body不能和其他，注解同一个参数:" + parameterName + "!");
+                throw new InterfaceCallInitException(key + " body不能和其他，注解同一个参数:" + parameterName + "!");
             }
 
         }

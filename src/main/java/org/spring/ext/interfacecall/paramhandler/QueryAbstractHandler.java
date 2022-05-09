@@ -6,6 +6,7 @@ import org.spring.ext.interfacecall.annotation.Body;
 import org.spring.ext.interfacecall.annotation.Head;
 import org.spring.ext.interfacecall.annotation.Query;
 import org.spring.ext.interfacecall.annotation.Url;
+import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 
 import java.lang.reflect.Parameter;
 
@@ -44,9 +45,9 @@ public class QueryAbstractHandler extends AbstractHandlerChain {
         boolean isValidate=(query!=null&&url==null&&head==null&&body==null);
         if(!isNull){
             if(!isValidate){
-                throw new RuntimeException(key+" query不能和其他，注解同一个参数:"+parameterName+"!");
+                throw new InterfaceCallInitException(key+" query不能和其他，注解同一个参数:"+parameterName+"!");
             }
         }
-        //Query注解暂时只支持一个 待扩展
+
     }
 }

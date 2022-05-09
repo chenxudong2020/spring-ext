@@ -4,11 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.ext.interfacecall.ApiRestTemplate;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
+import org.spring.ext.interfacecall.exception.InterfaceInvokeException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -43,6 +46,20 @@ public class GetHandler implements MethodHandler  {
         LOG.info(String.format("-->get:%s",url));
         HttpEntity formEntity = new HttpEntity<>(headers);
         ApiRestTemplate restTemplate =beanFactory.getBean(restTemplateClass);
-        return restTemplate.exchange(url, HttpMethod.GET,formEntity,Class.forName(returnName),map).getBody();
+        try {
+            return restTemplate.exchange(url, HttpMethod.GET,formEntity,Class.forName(returnName),map).getBody();
+        }catch (ResourceAccessException e){
+            if(isCallBack){
+                Object obj= beanFactory.getBean(callBackClass);
+                Method methodCall= ReflectionUtils.findMethod(callBackClass,method.getName());
+                if(null!=methodCall){
+                    return methodCall.invoke(obj,method.getParameters());
+                }else{
+                    throw new InterfaceInvokeException("CallBack配置类中未找到同名方法！");
+                }
+            }
+            throw new InterfaceInvokeException(e);
+
+        }
     }
 }

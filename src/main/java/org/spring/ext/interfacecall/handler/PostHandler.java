@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.ext.interfacecall.ApiRestTemplate;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
+import org.spring.ext.interfacecall.exception.InterfaceInvokeException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.cglib.beans.BeanMap;
 import org.springframework.http.HttpEntity;
@@ -81,10 +82,10 @@ public class PostHandler implements MethodHandler {
                 if(null!=methodCall){
                     return methodCall.invoke(obj,method.getParameters());
                 }else{
-                    throw new RuntimeException("CallBack配置类中未找到同名方法！");
+                    throw new InterfaceInvokeException("CallBack配置类中未找到同名方法！");
                 }
             }
-            throw new RuntimeException(e);
+            throw new InterfaceInvokeException(e);
 
         }
 

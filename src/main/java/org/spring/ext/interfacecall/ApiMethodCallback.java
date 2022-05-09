@@ -8,6 +8,7 @@ import org.spring.ext.interfacecall.annotation.Type;
 import org.spring.ext.interfacecall.entity.Constant;
 import org.spring.ext.interfacecall.entity.MethodMeta;
 import org.spring.ext.interfacecall.entity.ParameterMeta;
+import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
 import org.spring.ext.interfacecall.paramhandler.ParamHandler;
@@ -106,7 +107,7 @@ public class ApiMethodCallback implements ReflectionUtils.MethodCallback {
     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
         CallProperties callProperties =  beanFactory.getBean(CallProperties.class);
         if (this.hasAnnotation(method,POST.class) && this.hasAnnotation(method,GET.class)) {
-            throw new RuntimeException(method.getName() + "POST和GET不能注解同一个方法!");
+            throw new InterfaceCallInitException(method.getName() + "POST和GET不能注解同一个方法!");
         } else if (this.hasAnnotation(method,POST.class) && !this.hasAnnotation(method,GET.class)) {
             this.initPostMethod(method, beanDefinition, interfaceClientValue, map, callProperties);
 

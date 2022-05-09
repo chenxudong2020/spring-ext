@@ -3,6 +3,9 @@ package org.spring.ext.interfacecall.annotation;
 import java.lang.annotation.*;
 
 
+/**
+ * @author 87260
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
