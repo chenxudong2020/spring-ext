@@ -13,20 +13,18 @@ import java.lang.reflect.Method;
 
 public class CallInterfaceHandler implements InvocationHandler {
     private BeanFactory beanFactory;
-    private final String className;
+    private String className;
     private Class<? extends ApiRestTemplate> restTemplateClass;
     private Class callBackClass;
     private boolean isCallBack;
 
 
-    public CallInterfaceHandler(BeanFactory beanFactory, String className, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack) {
+    public CallInterfaceHandler(BeanFactory beanFactory,Class<? extends ApiRestTemplate> restTemplateClass) {
         this.beanFactory = beanFactory;
-        this.className = className;
-        this.restTemplateClass=restTemplateClass;
-        this.callBackClass=callBackClass;
-        this.isCallBack=isCallBack;
-
+         this.restTemplateClass=restTemplateClass;
     }
+
+
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -41,5 +39,30 @@ public class CallInterfaceHandler implements InvocationHandler {
         MethodHandlerWrapper methodHandlerWrapper = new MethodHandlerWrapper(methodHandler, methodMeta, args, beanFactory, callProperties, className,restTemplateClass,callBackClass,isCallBack);
         return methodHandlerWrapper.invoke(proxy,method,args);
 
+    }
+
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public Class getCallBackClass() {
+        return callBackClass;
+    }
+
+    public void setCallBackClass(Class callBackClass) {
+        this.callBackClass = callBackClass;
+    }
+
+    public boolean isCallBack() {
+        return isCallBack;
+    }
+
+    public void setCallBack(boolean callBack) {
+        isCallBack = callBack;
     }
 }

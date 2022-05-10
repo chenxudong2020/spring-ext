@@ -24,24 +24,28 @@ public class CallInterfaceFactoryBean<T> implements FactoryBean<T>,EnvironmentAw
     private Class<? extends ApiRestTemplate> restTemplateClass;
     private Class callBackClass;
     private boolean isCallBack;
+    private CallInterfaceHandler callInterfaceHandler;
 
 
-    public CallInterfaceFactoryBean(Class<T> callInterface, List<Object> listResource, BeanFactory beanFactory, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack) {
+    public CallInterfaceFactoryBean(Class<T> callInterface, List<Object> listResource, BeanFactory beanFactory, Class<? extends ApiRestTemplate> restTemplateClass, Class callBackClass, boolean isCallBack,CallInterfaceHandler callInterfaceHandler) {
         this.listResource=listResource;
         this.callInterface = callInterface;
         this.beanFactory=beanFactory;
         this.restTemplateClass=restTemplateClass;
         this.callBackClass=callBackClass;
         this.isCallBack=isCallBack;
+        this.callInterfaceHandler=callInterfaceHandler;
 
     }
 
     @Override
     public T getObject(){
+        callInterfaceHandler.setCallBack(isCallBack);
+        callInterfaceHandler.setCallBackClass(callBackClass);
+        callInterfaceHandler.setClassName(callInterface.getName());
         return (T) Proxy.newProxyInstance(callInterface.getClassLoader(),
                 new Class<?>[]{callInterface},
-                new CallInterfaceHandler(beanFactory,callInterface.getName(),restTemplateClass,callBackClass,isCallBack)
-
+                callInterfaceHandler
         );
 
     }

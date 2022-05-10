@@ -61,6 +61,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory);
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(restTemplateClass.getName());
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(callBackClass.getName());
+
             boolean isCallBack=false;
             try {
                 isCallBack=genericBeanDefinition.resolveBeanClass(classLoader).isAssignableFrom(callBackClass);
@@ -68,6 +69,7 @@ public class ImportCallBeanDefinitionScanner extends ClassPathBeanDefinitionScan
 
             }
             genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(isCallBack);
+            genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(getRegistry().getBeanDefinition(CallInterfaceHandler.class.getName()));
             if(isCallBack){
                 GenericBeanDefinition callBackClassGenericBeanDefinition=new GenericBeanDefinition();
                 callBackClassGenericBeanDefinition.setBeanClass(callBackClass);

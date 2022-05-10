@@ -92,7 +92,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.registerBean(GetHandler.class,registry);
         this.registerBean(CacheHandler.class,registry);
         this.registerBean(restTemplateClass,registry);
-
+        this.registerCallInterfaceHandler(registry,restTemplateClass);
 
         ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory,restTemplateClass);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
@@ -111,7 +111,14 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         registry.registerBeanDefinition(classz.getName(),genericBeanDefinition);
     }
 
-
+    private void registerCallInterfaceHandler(BeanDefinitionRegistry registry,Class restTemplateClass){
+        GenericBeanDefinition genericBeanDefinition=new GenericBeanDefinition();
+        genericBeanDefinition.setBeanClass(CallInterfaceHandler.class);
+        genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory);
+        genericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(restTemplateClass.getName());
+        genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        registry.registerBeanDefinition(CallInterfaceHandler.class.getName(),genericBeanDefinition);
+    }
 
 
     public void setClassLoader(ClassLoader classLoader) {
