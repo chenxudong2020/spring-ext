@@ -3,9 +3,14 @@ package org.spring.ext.interfacecall;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spring.ext.interfacecall.annotation.InterfaceClient;
+import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 import org.spring.ext.interfacecall.handler.CacheHandler;
 import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
+import org.spring.ext.interfacecall.proxy.ProxyController;
+import org.spring.ext.interfacecall.proxy.ProxyRegistry;
+import org.spring.ext.interfacecall.proxy.ProxyRestTemplate;
+import org.spring.ext.interfacecall.proxy.ProxyServlet;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -13,17 +18,20 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.servlet.mvc.ServletWrappingController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import javax.servlet.ServletRegistration;
+import java.io.IOException;
+import java.util.*;
 
 
 public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, ResourceLoaderAware, BeanClassLoaderAware,BeanFactoryAware {
@@ -92,7 +100,13 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.registerBean(GetHandler.class,registry);
         this.registerBean(CacheHandler.class,registry);
         this.registerBean(restTemplateClass,registry);
+        this.registerBean(ProxyRestTemplate.class,registry);
         this.registerCallInterfaceHandler(registry,restTemplateClass);
+
+
+        Resource resource=resourceLoader.getResource("classpath:proxy.properties");
+        this.registerProxyServletBean(resource,registry);
+
 
         ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory,restTemplateClass);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
@@ -103,6 +117,41 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
     }
 
+
+    private void registerProxyServletBean(Resource resource,BeanDefinitionRegistry registry){
+
+        Map<String, ServletWrappingController> registerHandlers=new HashMap<>();
+        Properties prop = new Properties();
+        try {
+            prop.load(resource.getInputStream());
+        } catch (IOException e) {
+            throw new InterfaceCallInitException(e);
+        }
+        Set<String> set=prop.stringPropertyNames();
+        for(String name:set) {
+            String proxyUrlMapping = name;
+            String proxy = prop.getProperty(name);
+            if (proxy == null) {
+                throw new InterfaceCallInitException("proxy配置不能为空");
+            }
+            if (proxy.toLowerCase().indexOf("http") == -1 && proxy.toLowerCase().indexOf("https") == -1) {
+                throw new InterfaceCallInitException("proxy配置必须以http或者https开头！");
+            }
+
+            GenericBeanDefinition proxyControlleGenericBeanDefinition=new GenericBeanDefinition();
+            proxyControlleGenericBeanDefinition.setBeanClass(ProxyController.class);
+            proxyControlleGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory.getBean(ProxyRestTemplate.class));
+            proxyControlleGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(proxyUrlMapping);
+            proxyControlleGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(proxy);
+            registry.registerBeanDefinition(proxyUrlMapping,proxyControlleGenericBeanDefinition);
+            registerHandlers.put(proxyUrlMapping,(ServletWrappingController)beanFactory.getBean(proxyUrlMapping));
+        }
+
+        GenericBeanDefinition servletRegistrationBeanGenericBeanDefinition=new GenericBeanDefinition();
+        servletRegistrationBeanGenericBeanDefinition.setBeanClass(ProxyRegistry.class);
+        servletRegistrationBeanGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(registerHandlers);
+        registry.registerBeanDefinition(ProxyRegistry.class.getName(),servletRegistrationBeanGenericBeanDefinition);
+    }
 
     private void registerBean(Class classz,BeanDefinitionRegistry registry){
         GenericBeanDefinition genericBeanDefinition=new GenericBeanDefinition();
