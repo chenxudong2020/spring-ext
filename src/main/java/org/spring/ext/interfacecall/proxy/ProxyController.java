@@ -1,7 +1,6 @@
 package org.spring.ext.interfacecall.proxy;
 
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.ServletWrappingController;
 
 import java.lang.reflect.Field;

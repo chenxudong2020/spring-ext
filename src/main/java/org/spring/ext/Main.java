@@ -14,8 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.Servlet;
 
 @SpringBootApplication
-@EnableInterfaceCall
-@PropertySource(name="my",value = "classpath:my.properties")
+@EnableInterfaceCall(value = "classpath:my.properties",proxyEnable = true)
 @PropertySource(name="proxy",value = "classpath:proxy.properties")
 public class Main {
 

@@ -10,12 +10,12 @@ import java.util.Map;
 /**
  * @author 87260
  */
-public class ProxyRegistry extends AbstractUrlHandlerMapping {
+public class ProxyUrlHandlerMapping extends AbstractUrlHandlerMapping {
     private volatile boolean dirty = true;
 
     private Map<String, ServletWrappingController> registerHandlers;
 
-    public ProxyRegistry(Map<String, ServletWrappingController> registerHandlers) {
+    public ProxyUrlHandlerMapping(Map<String, ServletWrappingController> registerHandlers) {
         setOrder(Integer.MIN_VALUE);
         this.registerHandlers=registerHandlers;
     }

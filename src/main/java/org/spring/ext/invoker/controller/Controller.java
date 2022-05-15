@@ -1,6 +1,7 @@
 package org.spring.ext.invoker.controller;
 
 
+import org.spring.ext.interfacecall.EnableProxy;
 import org.spring.ext.invoker.bean.Input;
 import org.spring.ext.invoker.bean.Result;
 import org.spring.ext.invoker.bean.User;
