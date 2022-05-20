@@ -11,7 +11,7 @@ import java.io.InputStream;
 public class UploadResource extends InputStreamResource {
 
     private long contentLength;
-    private String filename;
+
 
     public UploadResource(InputStream inputStream) {
         super(inputStream);
@@ -23,8 +23,5 @@ public class UploadResource extends InputStreamResource {
         return this.contentLength;
     }
 
-    @Override
-    public String getFilename() {
-        return this.filename;
-    }
+
 }

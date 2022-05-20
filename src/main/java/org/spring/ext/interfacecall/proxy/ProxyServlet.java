@@ -5,6 +5,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartRequest;
 
@@ -113,11 +114,9 @@ public class ProxyServlet extends HttpServlet {
 
     public void uploadDispatch(ServletRequest request, ServletResponse response, String toUrl)
             throws IOException, ServletException {
-        MultipartHttpServletRequest req = (MultipartHttpServletRequest) request;
-        UploadResource inputStreamResource = new UploadResource(req.getInputStream());
+        UploadResource inputStreamResource = new UploadResource(request.getInputStream());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        // 进行转发
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
         parts.add("file", inputStreamResource);
         HttpEntity<MultiValueMap<String, Object>> mutiReq = new HttpEntity<>(parts, headers);
