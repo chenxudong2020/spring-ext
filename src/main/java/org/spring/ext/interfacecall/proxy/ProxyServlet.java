@@ -1,21 +1,28 @@
 package org.spring.ext.interfacecall.proxy;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartRequest;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author 87260
@@ -57,20 +64,105 @@ public class ProxyServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpHeaders headers=new HttpHeaders();
-        Enumeration<String> headerNames= req.getHeaderNames();
-         while(headerNames.hasMoreElements()){
-             String headerName=headerNames.nextElement();
-             headers.add(headerName,req.getHeader(headerName));
+        if (req instanceof MultipartHttpServletRequest) {
+            this.uploadDispatch(req, resp, proxy);
+        } else if (req instanceof MultipartRequest) {
+            this.uploadDispatch(req, resp, proxy);
+        } else {
+            this.doDispatch(req, resp, proxy);
         }
-         String paramJson = StreamUtils.copyToString(req.getInputStream(), Charset.forName("UTF-8"));
-         headers.remove("accept-encoding");
-         HttpEntity formEntity = new HttpEntity(paramJson,headers);
-         ResponseEntity<String> responseEntity=restTemplate.exchange(proxy,HttpMethod.resolve(req.getMethod()),formEntity,String.class,req.getParameterMap());
-         HttpHeaders responseEntityHeaders=responseEntity.getHeaders();
-         resp.setHeader("Content-Type",responseEntityHeaders.get("Content-Type").get(0));
-         resp.setStatus(responseEntity.getStatusCodeValue());
-         resp.getOutputStream().write(responseEntity.getBody().toString().getBytes(StandardCharsets.UTF_8));
+
 
     }
+
+
+    private void doDispatch(HttpServletRequest req, HttpServletResponse res, String toUrl) throws ServletException {
+        RequestEntity<byte[]> requestEntity = null;
+        try {
+            requestEntity = this.createRequestEntity(req, toUrl);
+        } catch (URISyntaxException | IOException e) {
+            throw new ServletException(e);
+        }
+        ResponseEntity<byte[]> responseEntity = null;
+        try {
+            responseEntity = restTemplate.exchange(requestEntity, byte[].class);
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+        // 开始执行跳转
+        HttpHeaders httpHeaders = responseEntity.getHeaders();
+        for (Map.Entry<String, List<String>> entry : httpHeaders.entrySet()) {
+            String headerName = entry.getKey();
+            List<String> headerValues = entry.getValue();
+            for (String headerValue : headerValues) {
+                res.addHeader(headerName, headerValue);
+            }
+        }
+        if (responseEntity.hasBody()) {
+            ServletOutputStream outputStream = null;
+            try {
+                outputStream = res.getOutputStream();
+                outputStream.write(responseEntity.getBody());
+                outputStream.flush();
+            } catch (IOException e) {
+                throw new ServletException(e);
+            }
+        }
+    }
+
+
+    public void uploadDispatch(ServletRequest request, ServletResponse response, String toUrl)
+            throws IOException, ServletException {
+        MultipartHttpServletRequest req = (MultipartHttpServletRequest) request;
+        UploadResource inputStreamResource = new UploadResource(req.getInputStream());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        // 进行转发
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("file", inputStreamResource);
+        HttpEntity<MultiValueMap<String, Object>> mutiReq = new HttpEntity<>(parts, headers);
+        ResponseEntity<byte[]> responseEntity = restTemplate.exchange(toUrl, HttpMethod.POST, mutiReq, byte[].class,
+                new HashMap<String, Object>());
+        if (responseEntity.hasBody()) {
+            try {
+                ServletOutputStream outputStream = response.getOutputStream();
+                outputStream.write(responseEntity.getBody());
+                outputStream.flush();
+            } catch (IOException e) {
+                throw new ServletException(e);
+            }
+        }
+    }
+
+
+    private RequestEntity<byte[]> createRequestEntity(HttpServletRequest request, String url)
+            throws URISyntaxException, IOException {
+        String method = request.getMethod();
+        // 1、封装请求头
+        HttpMethod httpMethod = HttpMethod.resolve(method);
+        // 2、封装请求体
+        MultiValueMap<String, String> headers = createRequestHeaders(request);
+        // 3、构造出RestTemplate能识别的RequestEntity
+        byte[] body = createRequestBody(request);
+        RequestEntity<byte[]> requestEntity = new RequestEntity<byte[]>(body, headers, httpMethod, new URI(url));
+        return requestEntity;
+    }
+
+    private byte[] createRequestBody(HttpServletRequest request) throws IOException {
+        InputStream inputStream = request.getInputStream();
+        return StreamUtils.copyToByteArray(inputStream);
+    }
+
+    private MultiValueMap<String, String> createRequestHeaders(HttpServletRequest request) {
+        HttpHeaders headers = new HttpHeaders();
+        List<String> headerNames = Collections.list(request.getHeaderNames());
+        for (String headerName : headerNames) {
+            List<String> headerValues = Collections.list(request.getHeaders(headerName));
+            for (String headerValue : headerValues) {
+                headers.add(headerName, headerValue);
+            }
+        }
+        return headers;
+    }
+
 }
