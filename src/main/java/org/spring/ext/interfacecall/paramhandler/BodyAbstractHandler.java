@@ -11,6 +11,9 @@ import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 
 import java.lang.reflect.Parameter;
 
+/**
+ * @author 87260
+ */
 public class BodyAbstractHandler extends AbstractHandlerChain {
 
     private AbstractHandlerChain handler;

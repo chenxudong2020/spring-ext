@@ -1,6 +1,8 @@
 package org.spring.ext.interfacecall;
 
 
+import org.spring.ext.interfacecall.proxy.DefaultProxyDataSource;
+import org.spring.ext.interfacecall.proxy.ProxyDataSource;
 import org.spring.ext.interfacecall.proxy.ProxyRestTemplate;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Import;
@@ -37,5 +39,8 @@ public @interface EnableInterfaceCall {
 
     //是否启用代理默认调用RestTemplate Class类
     Class<? extends ProxyRestTemplate> proxyRestTemplate() default ProxyRestTemplate.class;
+
+    //代理数据获取接口 默认DefaultProxyDataSource
+    Class<? extends ProxyDataSource> proxyDataSourceClass() default DefaultProxyDataSource.class;
 
 }

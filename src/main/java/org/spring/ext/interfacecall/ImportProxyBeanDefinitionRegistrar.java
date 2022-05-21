@@ -1,5 +1,7 @@
 package org.spring.ext.interfacecall;
 
+import org.spring.ext.interfacecall.proxy.DefaultProxyDataSource;
+import org.spring.ext.interfacecall.proxy.ProxyDataSource;
 import org.spring.ext.interfacecall.proxy.ProxyRegistrar;
 import org.spring.ext.interfacecall.proxy.ProxyRestTemplate;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -17,6 +19,7 @@ public class ImportProxyBeanDefinitionRegistrar implements ImportBeanDefinitionR
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         MultiValueMap<String, Object> map=importingClassMetadata.getAllAnnotationAttributes(EnableProxy.class.getName());
         Class<? extends ProxyRestTemplate> proxyRestTemplateClass=ProxyRestTemplate.class;
+        Class<? extends ProxyDataSource> proxyDataSourceClass= DefaultProxyDataSource.class;
         if(map!=null){
             List<Object> proxyRestTemplateList=map.get("proxyRestTemplate");
             if(proxyRestTemplateList!=null) {
@@ -25,12 +28,22 @@ public class ImportProxyBeanDefinitionRegistrar implements ImportBeanDefinitionR
                     break;
                 }
             }
+
+            List<Object> proxyDataSourceClassList=map.get("proxyDataSourceClass");
+            if(proxyDataSourceClassList!=null) {
+                for (Object proxyDataSourceClassObject: proxyDataSourceClassList) {
+                    proxyDataSourceClass=(Class<? extends ProxyDataSource>)proxyDataSourceClassObject;
+                    break;
+                }
+            }
         }
         this.registerBean(proxyRestTemplateClass,registry);
+        this.registerBean(proxyDataSourceClass,registry);
         GenericBeanDefinition genericBeanDefinition=new GenericBeanDefinition();
         genericBeanDefinition.setBeanClass(ProxyRegistrar.class);
         genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
         genericBeanDefinition.getPropertyValues().add("proxyRestTemplateClass",proxyRestTemplateClass);
+        genericBeanDefinition.getPropertyValues().add("proxyDataSourceClass",proxyDataSourceClass);
         registry.registerBeanDefinition(ProxyRegistrar.class.getName(),genericBeanDefinition);
 
 

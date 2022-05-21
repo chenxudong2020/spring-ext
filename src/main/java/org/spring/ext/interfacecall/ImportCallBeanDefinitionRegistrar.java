@@ -6,6 +6,8 @@ import org.spring.ext.interfacecall.annotation.InterfaceClient;
 import org.spring.ext.interfacecall.handler.CacheHandler;
 import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
+import org.spring.ext.interfacecall.proxy.DefaultProxyDataSource;
+import org.spring.ext.interfacecall.proxy.ProxyDataSource;
 import org.spring.ext.interfacecall.proxy.ProxyRegistrar;
 import org.spring.ext.interfacecall.proxy.ProxyRestTemplate;
 import org.springframework.beans.BeansException;
@@ -57,6 +59,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         List<String> basePackages=new ArrayList<>();
         Class<? extends ApiRestTemplate> restTemplateClass= ApiRestTemplate.class;
         Class<? extends ProxyRestTemplate> proxyRestTemplateClass=ProxyRestTemplate.class;
+        Class<? extends ProxyDataSource> proxyDataSourceClass= DefaultProxyDataSource.class;
         boolean proxyEnable = false;
         MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
         if(map!=null){
@@ -96,6 +99,14 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
                 }
             }
 
+            List<Object> proxyDataSourceClassList=map.get("proxyDataSourceClass");
+            if(proxyDataSourceClassList!=null) {
+                for (Object proxyDataSourceClassObject: proxyDataSourceClassList) {
+                    proxyDataSourceClass=(Class<? extends ProxyDataSource>)proxyDataSourceClassObject;
+                    break;
+                }
+            }
+
             List<Object> proxyEnableList=map.get("proxyEnable");
             if(proxyEnableList!=null) {
                 for (Object proxyEnableObj : proxyEnableList) {
@@ -113,6 +124,8 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.registerBean(CacheHandler.class,registry);
         this.registerBean(restTemplateClass,registry);
         this.registerBean(proxyRestTemplateClass,registry);
+        this.registerBean(proxyDataSourceClass,registry);
+
         this.registerCallInterfaceHandler(registry,restTemplateClass);
 
         if(proxyEnable){
@@ -120,6 +133,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
             genericBeanDefinition.setBeanClass(ProxyRegistrar.class);
             genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
             genericBeanDefinition.getPropertyValues().add("proxyRestTemplateClass",proxyRestTemplateClass);
+            genericBeanDefinition.getPropertyValues().add("proxyDataSourceClass",proxyDataSourceClass);
             registry.registerBeanDefinition(ProxyRegistrar.class.getName(),genericBeanDefinition);
         }
 

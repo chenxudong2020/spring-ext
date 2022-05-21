@@ -14,45 +14,42 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.servlet.mvc.ServletWrappingController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author 87260
  */
-public class ProxyRegistrar implements BeanDefinitionRegistryPostProcessor, ResourceLoaderAware, BeanFactoryAware {
-    private ResourceLoader resourceLoader;
+public class ProxyRegistrar implements BeanDefinitionRegistryPostProcessor, BeanFactoryAware {
+
     private BeanFactory beanFactory;
     private Class<? extends ProxyRestTemplate> proxyRestTemplateClass;
+    private Class<? extends ProxyDataSource> proxyDataSourceClass;
 
     public void setProxyRestTemplateClass(Class<? extends ProxyRestTemplate> proxyRestTemplateClass) {
         this.proxyRestTemplateClass = proxyRestTemplateClass;
     }
 
+    public void setProxyDataSourceClass(Class<? extends ProxyDataSource> proxyDataSourceClass) {
+        this.proxyDataSourceClass = proxyDataSourceClass;
+    }
+
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
-        Resource resource=resourceLoader.getResource("classpath:proxy.properties");
-        if(null!=resource){
-            this.registerProxyServletBean(resource,beanDefinitionRegistry);
+        ProxyDataSource proxyDataSource=beanFactory.getBean(proxyDataSourceClass);
+        Hashtable<String,String>  proxyData =proxyDataSource.getProxyData();
+        if(null!=proxyData){
+            this.registerProxyServletBean(proxyData,beanDefinitionRegistry);
         }
 
     }
 
 
-    private void registerProxyServletBean(Resource resource,BeanDefinitionRegistry registry){
+    private void registerProxyServletBean(Hashtable<String,String> proxyData,BeanDefinitionRegistry registry){
         Map<String, ServletWrappingController> registerHandlers=new HashMap<>();
-        Properties prop = new Properties();
-        try {
-            prop.load(resource.getInputStream());
-        } catch (IOException e) {
-            throw new InterfaceCallInitException(e);
-        }
-        Set<String> set=prop.stringPropertyNames();
+        Set<String> set=proxyData.keySet();
         for(String name:set) {
             String proxyUrlMapping = name;
-            String proxy = prop.getProperty(name);
+            String proxy = proxyData.get(name);
             if (proxy == null) {
                 throw new ProxyInitException("proxy配置不能为空");
             }
@@ -87,10 +84,6 @@ public class ProxyRegistrar implements BeanDefinitionRegistryPostProcessor, Reso
 
     }
 
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-       this.resourceLoader=resourceLoader;
-    }
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
