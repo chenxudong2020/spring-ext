@@ -20,10 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author 87260
@@ -66,9 +63,11 @@ public class ProxyServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (req instanceof MultipartHttpServletRequest) {
-            this.uploadDispatch(req, resp, proxy);
+            MultipartHttpServletRequest request=(MultipartHttpServletRequest)req;
+            this.uploadDispatch(req, resp, proxy,getMultiValueMap(request));
         } else if (req instanceof MultipartRequest) {
-            this.uploadDispatch(req, resp, proxy);
+            MultipartRequest request=(MultipartRequest)req;
+            this.uploadDispatch(req, resp, proxy,getMultiValueMap(request));
         } else {
             this.doDispatch(req, resp, proxy);
         }
@@ -112,13 +111,33 @@ public class ProxyServlet extends HttpServlet {
     }
 
 
-    public void uploadDispatch(ServletRequest request, ServletResponse response, String toUrl)
+    private MultiValueMap<String, Object> getMultiValueMap(MultipartRequest req){
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        MultiValueMap<String, MultipartFile> map=req.getMultiFileMap();
+        map.forEach((x,y)->{
+            parts.add(x,y);
+        });
+        return parts;
+    }
+
+    private MultiValueMap<String, Object> getMultiValueMap(MultipartHttpServletRequest req){
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        MultiValueMap<String, MultipartFile> map=req.getMultiFileMap();
+        map.forEach((x,y)->{
+            parts.add(x,y);
+        });
+        Map<String, String[]> parameterMap=req.getParameterMap();
+        parameterMap.forEach((x,y)->{
+            parts.add(x,y);
+        });
+        return parts;
+    }
+
+
+    public void uploadDispatch(ServletRequest request, ServletResponse response, String toUrl,MultiValueMap<String, Object> parts)
             throws IOException, ServletException {
-        UploadResource inputStreamResource = new UploadResource(request.getInputStream());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-        parts.add("file", inputStreamResource);
         HttpEntity<MultiValueMap<String, Object>> mutiReq = new HttpEntity<>(parts, headers);
         ResponseEntity<byte[]> responseEntity = restTemplate.exchange(toUrl, HttpMethod.POST, mutiReq, byte[].class,
                 new HashMap<String, Object>());
