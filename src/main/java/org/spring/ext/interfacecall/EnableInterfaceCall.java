@@ -1,17 +1,13 @@
 package org.spring.ext.interfacecall;
 
 
-import org.spring.ext.interfacecall.proxy.DefaultProxyDataSource;
-import org.spring.ext.interfacecall.proxy.ProxyDataSource;
-import org.spring.ext.interfacecall.proxy.ProxyRestTemplate;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
 /**
- * springmvc 集成需要的注解
+ * springmvc 集成需要的注解 启用快速调用三方接口的注解
  * @author 87260
  */
 @Documented

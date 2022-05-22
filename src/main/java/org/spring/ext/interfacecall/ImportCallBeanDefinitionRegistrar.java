@@ -8,7 +8,6 @@ import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
 import org.spring.ext.interfacecall.proxy.ProxyDataConfiguration;
 import org.spring.ext.interfacecall.proxy.ProxyRegistrar;
-import org.spring.ext.interfacecall.proxy.ProxyRestTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -16,9 +15,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
@@ -29,13 +26,24 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, ResourceLoaderAware, BeanClassLoaderAware,BeanFactoryAware {
+/**
+ * @author 87260
+ */
+public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware, BeanFactoryAware {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportCallBeanDefinitionRegistrar.class);
-    private ResourceLoader resourceLoader;
+
     private ClassLoader classLoader;
     private BeanFactory beanFactory;
+
+    /**
+     * 扫描的含有InterfaceClient注解的接口包
+     */
     private String[] basePackage;
+    /**
+     * 调用三方接口使用的定制RestTemplate
+     */
+    private Class<? extends ApiRestTemplate> restTemplateClass;
 
 
     public String[] getBasePackage() {
@@ -46,17 +54,25 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.basePackage = basePackage;
     }
 
+    public Class<? extends ApiRestTemplate> getRestTemplateClass() {
+        return restTemplateClass;
+    }
+
+    public void setRestTemplateClass(Class<? extends ApiRestTemplate> restTemplateClass) {
+        this.restTemplateClass = restTemplateClass;
+    }
+
     /**
      * 默认EnableInterfaceCall注解类所在包下的所有类
      * 或者配置basePackage属性的包下面的所有类
+     *
      * @param importingClassMetadata
      * @param registry
      */
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        List<Object> listResource=new ArrayList<>();
+        List<Object> listResource = new ArrayList<>();
         List<String> basePackages=new ArrayList<>();
-        Class<? extends ApiRestTemplate> restTemplateClass= ApiRestTemplate.class;
         boolean proxyEnable = false;
         MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
         if(map!=null){
@@ -115,8 +131,6 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
             if (!proxyDataConfigurationInit) {
                 this.registerBean(ProxyDataConfiguration.class, registry);
             }
-
-
             GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
             genericBeanDefinition.setBeanClass(ProxyRegistrar.class);
             genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
@@ -129,17 +143,16 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
         String[] packages = basePackages.toArray(new String[basePackages.size()]);
         scanner.doScan(packages);
-
     }
 
+    /**
+     * 判断beanFactory是否存在含有指定Class的对象
+     *
+     * @param classz
+     * @return
+     */
     private boolean isInBeanFactory(Class classz) {
-        try {
-            beanFactory.getBean(classz);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-
+        return beanFactory.getBeanProvider(classz).stream().count() != 0;
     }
 
 
@@ -175,8 +188,5 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
        this.beanFactory=beanFactory;
     }
 
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader=resourceLoader;
-    }
+
 }

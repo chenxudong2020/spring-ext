@@ -34,15 +34,13 @@ public class ImportProxyBeanDefinitionRegistrar implements ImportBeanDefinitionR
 
     }
 
-
+    /**
+     * 判断beanFactory是否存在含有指定Class的对象
+     * @param classz
+     * @return
+     */
     private boolean isInBeanFactory(Class classz) {
-        try {
-            beanFactory.getBean(classz);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-
+        return beanFactory.getBeanProvider(classz).stream().count()!=0;
     }
 
 

@@ -1,6 +1,5 @@
 package org.spring.ext.interfacecall;
 
-import org.spring.ext.interfacecall.CallProperties;
 import org.spring.ext.interfacecall.annotation.Cache;
 import org.spring.ext.interfacecall.annotation.GET;
 import org.spring.ext.interfacecall.annotation.POST;
@@ -14,7 +13,6 @@ import org.spring.ext.interfacecall.handler.PostHandler;
 import org.spring.ext.interfacecall.paramhandler.ParamHandler;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 

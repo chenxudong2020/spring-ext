@@ -7,10 +7,12 @@ import org.spring.ext.interfacecall.handler.MethodHandler;
 import org.spring.ext.interfacecall.handler.MethodHandlerWrapper;
 import org.springframework.beans.factory.BeanFactory;
 
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+/**
+ * @author 87260
+ */
 public class CallInterfaceHandler implements InvocationHandler {
     private BeanFactory beanFactory;
     private String className;

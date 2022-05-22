@@ -2,16 +2,9 @@ package org.spring.ext;
 
 
 import org.spring.ext.interfacecall.EnableInterfaceCall;
-import org.spring.ext.interfacecall.proxy.ProxyServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.client.RestTemplate;
-
-import javax.servlet.Servlet;
 
 @SpringBootApplication
 @EnableInterfaceCall(value = "classpath:my.properties",proxyEnable = true)

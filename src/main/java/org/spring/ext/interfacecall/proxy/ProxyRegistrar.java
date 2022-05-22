@@ -73,8 +73,6 @@ public class ProxyRegistrar implements BeanDefinitionRegistryPostProcessor, Bean
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
-
-
     }
 
 
