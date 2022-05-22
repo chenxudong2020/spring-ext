@@ -37,10 +37,7 @@ public @interface EnableInterfaceCall {
     boolean proxyEnable() default false;
 
 
-    //是否启用代理默认调用RestTemplate Class类
-    Class<? extends ProxyRestTemplate> proxyRestTemplate() default ProxyRestTemplate.class;
 
-    //代理数据获取接口 默认DefaultProxyDataSource
-    Class<? extends ProxyDataSource> proxyDataSourceClass() default DefaultProxyDataSource.class;
+
 
 }

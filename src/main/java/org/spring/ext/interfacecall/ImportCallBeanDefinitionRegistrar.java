@@ -6,8 +6,7 @@ import org.spring.ext.interfacecall.annotation.InterfaceClient;
 import org.spring.ext.interfacecall.handler.CacheHandler;
 import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
-import org.spring.ext.interfacecall.proxy.DefaultProxyDataSource;
-import org.spring.ext.interfacecall.proxy.ProxyDataSource;
+import org.spring.ext.interfacecall.proxy.ProxyDataConfiguration;
 import org.spring.ext.interfacecall.proxy.ProxyRegistrar;
 import org.spring.ext.interfacecall.proxy.ProxyRestTemplate;
 import org.springframework.beans.BeansException;
@@ -58,8 +57,6 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         List<Object> listResource=new ArrayList<>();
         List<String> basePackages=new ArrayList<>();
         Class<? extends ApiRestTemplate> restTemplateClass= ApiRestTemplate.class;
-        Class<? extends ProxyRestTemplate> proxyRestTemplateClass=ProxyRestTemplate.class;
-        Class<? extends ProxyDataSource> proxyDataSourceClass= DefaultProxyDataSource.class;
         boolean proxyEnable = false;
         MultiValueMap<String, Object>  map=importingClassMetadata.getAllAnnotationAttributes(EnableInterfaceCall.class.getName());
         if(map!=null){
@@ -83,14 +80,6 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
                 }
             }
 
-            List<Object> proxyRestTemplateList=map.get("proxyRestTemplate");
-            if(proxyRestTemplateList!=null) {
-                for (Object proxyRestTemplateObject : proxyRestTemplateList) {
-                    proxyRestTemplateClass=(Class<? extends ProxyRestTemplate>)proxyRestTemplateObject;
-                    break;
-                }
-            }
-
             List<Object> restTemplateClassList=map.get("restTemplateClass");
             if(basePackageList!=null) {
                 for (Object restTemplateClassObj : restTemplateClassList) {
@@ -99,13 +88,6 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
                 }
             }
 
-            List<Object> proxyDataSourceClassList=map.get("proxyDataSourceClass");
-            if(proxyDataSourceClassList!=null) {
-                for (Object proxyDataSourceClassObject: proxyDataSourceClassList) {
-                    proxyDataSourceClass=(Class<? extends ProxyDataSource>)proxyDataSourceClassObject;
-                    break;
-                }
-            }
 
             List<Object> proxyEnableList=map.get("proxyEnable");
             if(proxyEnableList!=null) {
@@ -123,36 +105,49 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.registerBean(GetHandler.class,registry);
         this.registerBean(CacheHandler.class,registry);
         this.registerBean(restTemplateClass,registry);
-        this.registerBean(proxyRestTemplateClass,registry);
-        this.registerBean(proxyDataSourceClass,registry);
+
+
 
         this.registerCallInterfaceHandler(registry,restTemplateClass);
 
-        if(proxyEnable){
-            GenericBeanDefinition genericBeanDefinition=new GenericBeanDefinition();
+        if(proxyEnable) {
+            boolean proxyDataConfigurationInit = this.isInBeanFactory(ProxyDataConfiguration.class);
+            if (!proxyDataConfigurationInit) {
+                this.registerBean(ProxyDataConfiguration.class, registry);
+            }
+
+
+            GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
             genericBeanDefinition.setBeanClass(ProxyRegistrar.class);
             genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-            genericBeanDefinition.getPropertyValues().add("proxyRestTemplateClass",proxyRestTemplateClass);
-            genericBeanDefinition.getPropertyValues().add("proxyDataSourceClass",proxyDataSourceClass);
-            registry.registerBeanDefinition(ProxyRegistrar.class.getName(),genericBeanDefinition);
+            registry.registerBeanDefinition(ProxyRegistrar.class.getName(), genericBeanDefinition);
         }
 
-        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader,listResource,beanFactory,restTemplateClass);
+        ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader, listResource, beanFactory, restTemplateClass);
         AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(InterfaceClient.class);
         scanner.addIncludeFilter(annotationTypeFilter);
         basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
-        String[] packages=basePackages.toArray(new String[basePackages.size()]);
+        String[] packages = basePackages.toArray(new String[basePackages.size()]);
         scanner.doScan(packages);
 
     }
 
+    private boolean isInBeanFactory(Class classz) {
+        try {
+            beanFactory.getBean(classz);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
 
 
-    private void registerBean(Class classz,BeanDefinitionRegistry registry){
-        GenericBeanDefinition genericBeanDefinition=new GenericBeanDefinition();
+    private void registerBean(Class classz, BeanDefinitionRegistry registry) {
+        GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
         genericBeanDefinition.setBeanClass(classz);
         genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-        registry.registerBeanDefinition(classz.getName(),genericBeanDefinition);
+        registry.registerBeanDefinition(classz.getName(), genericBeanDefinition);
     }
 
     private void registerCallInterfaceHandler(BeanDefinitionRegistry registry,Class restTemplateClass){

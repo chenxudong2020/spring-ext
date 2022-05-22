@@ -1,6 +1,5 @@
 package org.spring.ext.interfacecall.proxy;
 
-import org.spring.ext.interfacecall.exception.InterfaceCallInitException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -8,13 +7,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.servlet.mvc.ServletWrappingController;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author 87260
@@ -22,29 +19,25 @@ import java.util.*;
 public class ProxyRegistrar implements BeanDefinitionRegistryPostProcessor, BeanFactoryAware {
 
     private BeanFactory beanFactory;
-    private Class<? extends ProxyRestTemplate> proxyRestTemplateClass;
-    private Class<? extends ProxyDataSource> proxyDataSourceClass;
 
-    public void setProxyRestTemplateClass(Class<? extends ProxyRestTemplate> proxyRestTemplateClass) {
-        this.proxyRestTemplateClass = proxyRestTemplateClass;
-    }
 
-    public void setProxyDataSourceClass(Class<? extends ProxyDataSource> proxyDataSourceClass) {
-        this.proxyDataSourceClass = proxyDataSourceClass;
-    }
+
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
-        ProxyDataSource proxyDataSource=beanFactory.getBean(proxyDataSourceClass);
-        Hashtable<String,String>  proxyData =proxyDataSource.getProxyData();
+        ProxyDataConfiguration proxyDataConfiguration=beanFactory.getBean(ProxyDataConfiguration.class);
+        ProxyDataSource proxyDataSource= proxyDataConfiguration.getProxyDataSource();
+        ProxyRestTemplate proxyRestTemplate=proxyDataConfiguration.getProxyRestTemplate();
+        Map<String,String>  proxyData =proxyDataSource.getProxyData();
+
         if(null!=proxyData){
-            this.registerProxyServletBean(proxyData,beanDefinitionRegistry);
+            this.registerProxyServletBean(proxyData,proxyRestTemplate,beanDefinitionRegistry);
         }
 
     }
 
 
-    private void registerProxyServletBean(Hashtable<String,String> proxyData,BeanDefinitionRegistry registry){
+    private void registerProxyServletBean(Map<String,String> proxyData,ProxyRestTemplate proxyRestTemplate,BeanDefinitionRegistry registry){
         Map<String, ServletWrappingController> registerHandlers=new HashMap<>();
         Set<String> set=proxyData.keySet();
         for(String name:set) {
@@ -59,7 +52,7 @@ public class ProxyRegistrar implements BeanDefinitionRegistryPostProcessor, Bean
 
             GenericBeanDefinition proxyControlleGenericBeanDefinition=new GenericBeanDefinition();
             proxyControlleGenericBeanDefinition.setBeanClass(ProxyController.class);
-            proxyControlleGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanFactory.getBean(proxyRestTemplateClass));
+            proxyControlleGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(proxyRestTemplate);
             proxyControlleGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(proxyUrlMapping);
             proxyControlleGenericBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(proxy);
             if(registry.containsBeanDefinition(proxyUrlMapping)){
