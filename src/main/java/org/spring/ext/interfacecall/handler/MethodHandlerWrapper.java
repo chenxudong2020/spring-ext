@@ -81,7 +81,7 @@ public class MethodHandlerWrapper implements MethodHandler {
         HttpHeaders headers = new HttpHeaders();
         MediaType type = MediaType.parseMediaType(methodMeta.type == null ? MediaType.APPLICATION_JSON_VALUE : methodMeta.type.value());
         headers.setContentType(type);
-        headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+        headers.add("Accept", MediaType.ALL_VALUE);
         Map map = new HashMap(16);
         String url = interfaceUrl;
         if (args == null) {
