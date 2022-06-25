@@ -29,8 +29,7 @@ public @interface EnableInterfaceCall {
     Class<? extends ApiRestTemplate> restTemplateClass() default ApiRestTemplate.class;
 
 
-    //是否启用代理模块 默认false
-    boolean proxyEnable() default false;
+
 
 
 

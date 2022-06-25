@@ -5,17 +5,14 @@ import org.spring.ext.interfacecall.EnableProxy;
 import org.spring.ext.invoker.bean.Input;
 import org.spring.ext.invoker.bean.Result;
 import org.spring.ext.invoker.bean.User;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class Controller {
 
 
-    @PostMapping("/getUser")
-    public Result getUser(@RequestBody Input input){
+    @GetMapping("/getUser")
+    public Result getUser(Input input){
         String id=input.getId();
         User user=new User();
         user.setName(id);

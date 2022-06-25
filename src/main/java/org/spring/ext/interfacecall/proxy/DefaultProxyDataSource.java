@@ -5,11 +5,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-/**
- * 默认从当前classpath下获取proxy.properties中获取代理数据
- * @author 87260
- */
-public class DefaultProxyDataSource implements ProxyDataSource {
+public class DefaultProxyDataSource implements ProxyDataSource{
 
     @Override
     public Map<String, String> getProxyData() {
@@ -21,6 +17,4 @@ public class DefaultProxyDataSource implements ProxyDataSource {
         }
         return map;
     }
-
-
 }

@@ -6,8 +6,6 @@ import org.spring.ext.interfacecall.annotation.InterfaceClient;
 import org.spring.ext.interfacecall.handler.CacheHandler;
 import org.spring.ext.interfacecall.handler.GetHandler;
 import org.spring.ext.interfacecall.handler.PostHandler;
-import org.spring.ext.interfacecall.proxy.ProxyDataConfiguration;
-import org.spring.ext.interfacecall.proxy.ProxyRegistrar;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -127,14 +125,7 @@ public class ImportCallBeanDefinitionRegistrar implements ImportBeanDefinitionRe
         this.registerCallInterfaceHandler(registry,restTemplateClass);
 
         if(proxyEnable) {
-            boolean proxyDataConfigurationInit = this.isInBeanFactory(ProxyDataConfiguration.class);
-            if (!proxyDataConfigurationInit) {
-                this.registerBean(ProxyDataConfiguration.class, registry);
-            }
-            GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
-            genericBeanDefinition.setBeanClass(ProxyRegistrar.class);
-            genericBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-            registry.registerBeanDefinition(ProxyRegistrar.class.getName(), genericBeanDefinition);
+
         }
 
         ImportCallBeanDefinitionScanner scanner = new ImportCallBeanDefinitionScanner(registry, classLoader, listResource, beanFactory, restTemplateClass);
