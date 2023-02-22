@@ -6,7 +6,7 @@
 
     <groupId>org.spring.ext</groupId>
     <artifactId>spring-ext</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -18,9 +18,13 @@
 
 
     <properties>
+        <jdk.version>1.6</jdk.version>
+        <sourceEncoding>UTF-8</sourceEncoding>
+        <mybatis.version>3.2.8</mybatis.version>
+        <spring.version>4.1.7.RELEASE</spring.version>
+        <velocity.version>1.7</velocity.version>
+        <mybatis-spring.version>1.2.3</mybatis-spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -96,6 +100,7 @@
     </dependencies>
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -104,12 +109,30 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <encoding>${sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
         </plugins>
-    </build>
 
+    </build>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Internal Releases</name>
+            <url>http://dubux.eu.org:9091/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>http://dubux.eu.org:9091/repository/maven-snapshots/</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
