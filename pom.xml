@@ -18,7 +18,7 @@
 
 
     <properties>
-        <jdk.version>1.6</jdk.version>
+        <jdk.version>1.8</jdk.version>
         <sourceEncoding>UTF-8</sourceEncoding>
         <mybatis.version>3.2.8</mybatis.version>
         <spring.version>4.1.7.RELEASE</spring.version>
@@ -122,17 +122,17 @@
         </plugins>
 
     </build>
-    <distributionManagement>
+    <!--<distributionManagement>
         <repository>
-            <id>releases</id>
+            <id>rdc-releases</id>
             <name>Internal Releases</name>
-            <url>http://dubux.eu.org:9091/repository/maven-releases/</url>
+            <url>https://packages.aliyun.com/maven/repository/2335176-release-LAGUuD</url>
         </repository>
         <snapshotRepository>
-            <id>snapshots</id>
+            <id>rdc-snapshots</id>
             <name>Nexus Snapshot Repository</name>
-            <url>http://dubux.eu.org:9091/repository/maven-snapshots/</url>
+            <url>https://packages.aliyun.com/maven/repository/2335176-snapshot-UlxcX5</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
-    </distributionManagement>
+    </distributionManagement>-->
 </project>
