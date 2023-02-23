@@ -68,7 +68,7 @@ import java.util.Formatter;
  *
  * @author David Smiley dsmiley@apache.org
  */
-@SuppressWarnings({"deprecation", "serial", "WeakerAccess"})
+@SuppressWarnings("all")
 public class ProxyServlet extends HttpServlet {
 
   /* INIT PARAMETER NAME CONSTANTS */

@@ -21,6 +21,7 @@ import org.springframework.web.client.ResourceAccessException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+@SuppressWarnings("all")
 public class PostHandler implements MethodHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PostHandler.class);
 
