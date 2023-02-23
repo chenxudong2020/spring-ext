@@ -122,7 +122,7 @@
         </plugins>
 
     </build>
-    <!--<distributionManagement>
+     <distributionManagement>
         <repository>
             <id>rdc-releases</id>
             <name>Internal Releases</name>
@@ -134,5 +134,5 @@
             <url>https://packages.aliyun.com/maven/repository/2335176-snapshot-UlxcX5</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
-    </distributionManagement>-->
+    </distributionManagement>
 </project>
